@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/models/profile.dart';
+import 'package:gp_link/services/auth_error_translator.dart';
 import 'package:gp_link/services/auth_service.dart';
 import 'package:gp_link/services/supabase_service.dart';
 
@@ -98,10 +99,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _authService.sendOtp(phone);
       state = state.copyWith(isLoading: false);
     } catch (e) {
-      final msg = e.toString();
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur d\'envoi du code. $msg',
+        error: AuthErrorTranslator.translateSendOtp(e),
       );
     }
   }
@@ -114,10 +114,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _loadProfile();
       return true;
     } catch (e) {
-      final msg = e.toString();
       state = state.copyWith(
         isLoading: false,
-        error: 'Code incorrect ou expiré. $msg',
+        error: AuthErrorTranslator.translateVerifyOtp(e),
       );
       return false;
     }

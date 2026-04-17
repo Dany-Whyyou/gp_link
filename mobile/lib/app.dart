@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/router.dart';
@@ -19,6 +20,11 @@ class GPLinkApp extends ConsumerWidget {
       themeMode: ThemeMode.system,
       routerConfig: router,
       locale: const Locale('fr', 'FR'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       supportedLocales: const [
         Locale('fr', 'FR'),
         Locale('en', 'US'),

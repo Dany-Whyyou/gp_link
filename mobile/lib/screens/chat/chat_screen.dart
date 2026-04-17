@@ -183,7 +183,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 const SizedBox(width: 8),
                 Container(
                   decoration: const BoxDecoration(
-                    color: AppTheme.primaryGold,
+                    color: AppTheme.primarySky,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -269,7 +269,7 @@ class _MessageBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: isMine
-              ? AppTheme.primaryGold
+              ? AppTheme.primarySky
               : Theme.of(context).brightness == Brightness.dark
                   ? AppTheme.cardDark
                   : const Color(0xFFEFEBE3),

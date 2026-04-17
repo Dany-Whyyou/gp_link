@@ -73,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? _buildFab(context)
           : _currentIndex == 1
               ? FloatingActionButton(
-                  backgroundColor: AppTheme.primaryGold,
+                  backgroundColor: AppTheme.primarySky,
                   onPressed: () => context.push('/alerts/create'),
                   child: const Icon(Icons.add, color: Colors.white),
                 )
@@ -86,7 +86,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (profile == null || !profile.isVoyageur) return null;
 
     return FloatingActionButton.extended(
-      backgroundColor: AppTheme.primaryGold,
+      backgroundColor: AppTheme.primarySky,
       onPressed: () => context.push('/announcements/create'),
       icon: const Icon(Icons.add, color: Colors.white),
       label: const Text(

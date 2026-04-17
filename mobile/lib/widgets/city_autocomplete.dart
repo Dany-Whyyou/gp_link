@@ -103,7 +103,7 @@ class _CityAutocompleteState extends State<CityAutocomplete> {
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppTheme.primaryGold.withValues(alpha: 0.3),
+                  color: AppTheme.primarySky.withValues(alpha: 0.3),
                 ),
               ),
               child: ListView.builder(
@@ -118,7 +118,7 @@ class _CityAutocompleteState extends State<CityAutocomplete> {
                   return ListTile(
                     dense: true,
                     leading: const Icon(Icons.location_on_outlined,
-                        size: 18, color: AppTheme.primaryGold),
+                        size: 18, color: AppTheme.primarySky),
                     title: Text(name,
                         style: const TextStyle(fontWeight: FontWeight.w500)),
                     subtitle: country.isNotEmpty ? Text(country) : null,

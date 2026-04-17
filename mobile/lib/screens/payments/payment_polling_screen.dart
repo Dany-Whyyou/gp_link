@@ -152,7 +152,7 @@ class _SuccessState extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(
             '${payment.amount.toStringAsFixed(0)} ${AppConstants.currencySymbol}',
-            style: const TextStyle(fontSize: 20, color: AppTheme.primaryDark),
+            style: const TextStyle(fontSize: 20, color: AppTheme.primaryNavy),
           ),
           const SizedBox(height: 12),
           const Text(

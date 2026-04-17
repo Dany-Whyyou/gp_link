@@ -86,9 +86,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryGold.withValues(alpha: 0.1),
+                    color: AppTheme.primarySky.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.primaryGold.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppTheme.primarySky.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     children: [
@@ -99,7 +99,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryDark,
+                          color: AppTheme.primaryNavy,
                         ),
                       ),
                     ],
@@ -192,11 +192,11 @@ class _OperatorOption extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: selected
-              ? AppTheme.primaryGold.withValues(alpha: 0.1)
+              ? AppTheme.primarySky.withValues(alpha: 0.1)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? AppTheme.primaryGold : const Color(0xFFE0E0E0),
+            color: selected ? AppTheme.primarySky : const Color(0xFFE0E0E0),
             width: selected ? 2 : 1,
           ),
         ),
@@ -206,7 +206,7 @@ class _OperatorOption extends StatelessWidget {
               operator == MobileMoneyOperator.airtel
                   ? Icons.phone_android
                   : Icons.smartphone,
-              color: selected ? AppTheme.primaryGold : Colors.grey,
+              color: selected ? AppTheme.primarySky : Colors.grey,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -215,7 +215,7 @@ class _OperatorOption extends StatelessWidget {
                 style: TextStyle(fontWeight: selected ? FontWeight.w600 : FontWeight.w400),
               ),
             ),
-            if (selected) const Icon(Icons.check_circle, color: AppTheme.primaryGold),
+            if (selected) const Icon(Icons.check_circle, color: AppTheme.primarySky),
           ],
         ),
       ),

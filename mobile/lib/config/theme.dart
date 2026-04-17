@@ -3,46 +3,48 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // -- Brand colors --
-  static const Color primaryGold = Color(0xFFD4A017);
-  static const Color primaryAmber = Color(0xFFF5A623);
-  static const Color primaryDark = Color(0xFFB8860B);
-  static const Color accentGreen = Color(0xFF009E60); // Gabon flag green
-  static const Color accentBlue = Color(0xFF3A75C4); // Gabon flag blue
-  static const Color accentYellow = Color(0xFFFCD116); // Gabon flag yellow
+  // -- Brand colors (Aviation theme) --
+  static const Color primarySky = Color(0xFF3A75C4);      // Bleu ciel (main brand)
+  static const Color primaryNavy = Color(0xFF0A2540);     // Bleu nuit (dark variant)
+  static const Color accentOrange = Color(0xFFF5A623);    // Orange coucher de soleil (CTA)
+  static const Color accentOrangeDark = Color(0xFFE08E10);
+
+  // -- Gabon flag accents (optionnels, secondaires) --
+  static const Color gabonGreen = Color(0xFF009E60);
+  static const Color gabonYellow = Color(0xFFFCD116);
 
   // -- Neutrals --
-  static const Color scaffoldDark = Color(0xFF121212);
-  static const Color surfaceDark = Color(0xFF1E1E1E);
-  static const Color cardDark = Color(0xFF2A2A2A);
-  static const Color scaffoldLight = Color(0xFFF5F0E8);
+  static const Color scaffoldDark = Color(0xFF0F172A);
+  static const Color surfaceDark = Color(0xFF1E293B);
+  static const Color cardDark = Color(0xFF334155);
+  static const Color scaffoldLight = Color(0xFFF8FAFC);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color cardLight = Color(0xFFFFF8EE);
+  static const Color cardLight = Color(0xFFF1F5F9);
 
   // -- Text --
   static const Color textOnDark = Color(0xFFF5F5F5);
   static const Color textSecondaryOnDark = Color(0xFFB0B0B0);
   static const Color textOnLight = Color(0xFF1A1A1A);
-  static const Color textSecondaryOnLight = Color(0xFF6B6B6B);
+  static const Color textSecondaryOnLight = Color(0xFF64748B);
 
   // -- Status --
-  static const Color success = Color(0xFF2ECC71);
+  static const Color success = Color(0xFF10B981);
   static const Color error = Color(0xFFE74C3C);
   static const Color warning = Color(0xFFF39C12);
-  static const Color info = Color(0xFF3498DB);
+  static const Color info = Color(0xFF3A75C4);
 
   // -- Swatch --
-  static const MaterialColor primarySwatch = MaterialColor(0xFFD4A017, {
-    50: Color(0xFFFDF6E3),
-    100: Color(0xFFFBEAB9),
-    200: Color(0xFFF8DC8C),
-    300: Color(0xFFF5CE5E),
-    400: Color(0xFFF2C33C),
-    500: Color(0xFFD4A017),
-    600: Color(0xFFC49315),
-    700: Color(0xFFB08312),
-    800: Color(0xFF9C740F),
-    900: Color(0xFF7A5A09),
+  static const MaterialColor primarySwatch = MaterialColor(0xFF3A75C4, {
+    50: Color(0xFFEFF5FC),
+    100: Color(0xFFD0E1F4),
+    200: Color(0xFFAECBEA),
+    300: Color(0xFF8CB5E0),
+    400: Color(0xFF62A3DA),
+    500: Color(0xFF3A75C4),
+    600: Color(0xFF2F68B4),
+    700: Color(0xFF2557A0),
+    800: Color(0xFF1D478A),
+    900: Color(0xFF0A2540),
   });
 
   static ThemeData get lightTheme {
@@ -51,11 +53,11 @@ class AppTheme {
       brightness: Brightness.light,
       primarySwatch: primarySwatch,
       colorScheme: ColorScheme.light(
-        primary: primaryGold,
+        primary: primarySky,
         onPrimary: Colors.white,
-        secondary: accentGreen,
+        secondary: accentOrange,
         onSecondary: Colors.white,
-        tertiary: accentBlue,
+        tertiary: gabonGreen,
         surface: surfaceLight,
         onSurface: textOnLight,
         error: error,
@@ -84,7 +86,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryGold,
+          backgroundColor: primarySky,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
@@ -98,8 +100,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primaryGold,
-          side: const BorderSide(color: primaryGold),
+          foregroundColor: primarySky,
+          side: const BorderSide(color: primarySky),
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -112,7 +114,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primaryGold,
+          foregroundColor: primarySky,
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -125,15 +127,15 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryGold, width: 2),
+          borderSide: const BorderSide(color: primarySky, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -144,22 +146,22 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surfaceLight,
-        selectedItemColor: primaryGold,
+        selectedItemColor: primarySky,
         unselectedItemColor: textSecondaryOnLight,
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: const Color(0xFFFFF3D6),
-        labelStyle: const TextStyle(color: primaryDark, fontSize: 12),
+        backgroundColor: const Color(0xFFEFF5FC),
+        labelStyle: const TextStyle(color: primaryNavy, fontSize: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
         side: BorderSide.none,
       ),
       dividerTheme: const DividerThemeData(
-        color: Color(0xFFE8E0D0),
+        color: Color(0xFFE2E8F0),
         thickness: 1,
       ),
       snackBarTheme: SnackBarThemeData(
@@ -177,11 +179,11 @@ class AppTheme {
       brightness: Brightness.dark,
       primarySwatch: primarySwatch,
       colorScheme: ColorScheme.dark(
-        primary: primaryAmber,
-        onPrimary: Colors.black,
-        secondary: accentGreen,
+        primary: primarySky,
+        onPrimary: Colors.white,
+        secondary: accentOrange,
         onSecondary: Colors.white,
-        tertiary: accentBlue,
+        tertiary: gabonGreen,
         surface: surfaceDark,
         onSurface: textOnDark,
         error: error,
@@ -210,7 +212,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryAmber,
+          backgroundColor: accentOrange,
           foregroundColor: Colors.black,
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
@@ -224,8 +226,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primaryAmber,
-          side: const BorderSide(color: primaryAmber),
+          foregroundColor: accentOrange,
+          side: const BorderSide(color: accentOrange),
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -233,7 +235,7 @@ class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(foregroundColor: primaryAmber),
+        style: TextButton.styleFrom(foregroundColor: accentOrange),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -241,26 +243,26 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF444444)),
+          borderSide: const BorderSide(color: Color(0xFF475569)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF444444)),
+          borderSide: const BorderSide(color: Color(0xFF475569)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryAmber, width: 2),
+          borderSide: const BorderSide(color: accentOrange, width: 2),
         ),
         hintStyle: const TextStyle(color: textSecondaryOnDark, fontSize: 14),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surfaceDark,
-        selectedItemColor: primaryAmber,
+        selectedItemColor: accentOrange,
         unselectedItemColor: textSecondaryOnDark,
         type: BottomNavigationBarType.fixed,
       ),
       dividerTheme: const DividerThemeData(
-        color: Color(0xFF333333),
+        color: Color(0xFF334155),
         thickness: 1,
       ),
       snackBarTheme: SnackBarThemeData(

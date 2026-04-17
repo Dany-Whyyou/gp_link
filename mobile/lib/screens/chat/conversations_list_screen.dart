@@ -37,7 +37,7 @@ class ConversationsListScreen extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            color: AppTheme.primaryGold,
+            color: AppTheme.primarySky,
             onRefresh: () async => ref.invalidate(conversationsProvider),
             child: ListView.builder(
               itemCount: conversations.length,
@@ -54,12 +54,12 @@ class ConversationsListScreen extends ConsumerWidget {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor:
-                        AppTheme.primaryGold.withValues(alpha: 0.2),
+                        AppTheme.primarySky.withValues(alpha: 0.2),
                     child: Text(
                       otherInitials,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryDark,
+                        color: AppTheme.primaryNavy,
                       ),
                     ),
                   ),
@@ -81,7 +81,7 @@ class ConversationsListScreen extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 12,
                             color: unread > 0
-                                ? AppTheme.primaryGold
+                                ? AppTheme.primarySky
                                 : Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -112,7 +112,7 @@ class ConversationsListScreen extends ConsumerWidget {
                       ? Container(
                           padding: const EdgeInsets.all(6),
                           decoration: const BoxDecoration(
-                            color: AppTheme.primaryGold,
+                            color: AppTheme.primarySky,
                             shape: BoxShape.circle,
                           ),
                           child: Text(

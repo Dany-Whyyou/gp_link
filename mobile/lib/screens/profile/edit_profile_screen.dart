@@ -147,20 +147,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       CircleAvatar(
                         radius: 48,
                         backgroundColor:
-                            AppTheme.primaryGold.withValues(alpha: 0.2),
+                            AppTheme.primarySky.withValues(alpha: 0.2),
                         backgroundImage: profile?.avatarUrl != null
                             ? NetworkImage(profile!.avatarUrl!)
                             : null,
                         child: _isUploadingAvatar
                             ? const CircularProgressIndicator(
-                                color: AppTheme.primaryGold)
+                                color: AppTheme.primarySky)
                             : profile?.avatarUrl == null
                                 ? Text(
                                     profile?.initials ?? '?',
                                     style: const TextStyle(
                                       fontSize: 28,
                                       fontWeight: FontWeight.bold,
-                                      color: AppTheme.primaryDark,
+                                      color: AppTheme.primaryNavy,
                                     ),
                                   )
                                 : null,
@@ -171,7 +171,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: const BoxDecoration(
-                            color: AppTheme.primaryGold,
+                            color: AppTheme.primarySky,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.camera_alt,

@@ -105,7 +105,7 @@ class _AnnouncementsListScreenState
           IconButton(
             icon: Icon(
               _showFilters ? Icons.filter_list_off : Icons.filter_list,
-              color: filter.hasFilters ? AppTheme.primaryGold : null,
+              color: filter.hasFilters ? AppTheme.primarySky : null,
             ),
             onPressed: () => setState(() => _showFilters = !_showFilters),
           ),
@@ -242,7 +242,7 @@ class _AnnouncementsListScreenState
     }
 
     return RefreshIndicator(
-      color: AppTheme.primaryGold,
+      color: AppTheme.primarySky,
       onRefresh: () => ref.read(announcementsProvider.notifier).refresh(),
       child: ListView.builder(
         controller: _scrollController,
@@ -255,7 +255,7 @@ class _AnnouncementsListScreenState
               child: Center(
                 child: CircularProgressIndicator(
                   valueColor:
-                      AlwaysStoppedAnimation<Color>(AppTheme.primaryGold),
+                      AlwaysStoppedAnimation<Color>(AppTheme.primarySky),
                 ),
               ),
             );

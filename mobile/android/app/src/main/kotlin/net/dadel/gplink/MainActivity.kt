@@ -1,4 +1,4 @@
-package com.gplink.gp_link
+package net.dadel.gplink
 
 import io.flutter.embedding.android.FlutterActivity
 

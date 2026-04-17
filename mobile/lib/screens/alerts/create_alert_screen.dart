@@ -44,7 +44,7 @@ class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
         data: Theme.of(context).copyWith(
           colorScheme: Theme.of(context)
               .colorScheme
-              .copyWith(primary: AppTheme.primaryGold),
+              .copyWith(primary: AppTheme.primarySky),
         ),
         child: child!,
       ),

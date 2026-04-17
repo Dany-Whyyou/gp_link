@@ -70,7 +70,7 @@ class _CreateAnnouncementScreenState
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context)
                 .colorScheme
-                .copyWith(primary: AppTheme.primaryGold),
+                .copyWith(primary: AppTheme.primarySky),
           ),
           child: child!,
         );
@@ -407,7 +407,7 @@ class _CreateAnnouncementScreenState
                   onChanged: (v) =>
                       setState(() => _collectAtAirport = v ?? true),
                   title: const Text('Récupération à l\'aéroport'),
-                  activeColor: AppTheme.primaryGold,
+                  activeColor: AppTheme.primarySky,
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -416,7 +416,7 @@ class _CreateAnnouncementScreenState
                   onChanged: (v) =>
                       setState(() => _deliverToAddress = v ?? false),
                   title: const Text('Livraison à domicile'),
-                  activeColor: AppTheme.primaryGold,
+                  activeColor: AppTheme.primarySky,
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -452,10 +452,10 @@ class _CreateAnnouncementScreenState
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryGold.withValues(alpha: 0.1),
+                    color: AppTheme.primarySky.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: AppTheme.primaryGold.withValues(alpha: 0.3)),
+                        color: AppTheme.primarySky.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     children: [
@@ -468,7 +468,7 @@ class _CreateAnnouncementScreenState
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: AppTheme.primaryDark,
+                              color: AppTheme.primaryNavy,
                             ),
                           ),
                         ],
@@ -478,7 +478,7 @@ class _CreateAnnouncementScreenState
                           padding: EdgeInsets.only(top: 4),
                           child: Text(
                             'Votre annonce sera mise en avant pendant 7 jours',
-                            style: TextStyle(fontSize: 12, color: AppTheme.primaryGold),
+                            style: TextStyle(fontSize: 12, color: AppTheme.primarySky),
                           ),
                         ),
                     ],
@@ -531,13 +531,13 @@ class _TypeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? (isBoosted
-                  ? AppTheme.primaryAmber.withValues(alpha: 0.15)
-                  : AppTheme.primaryGold.withValues(alpha: 0.1))
+                  ? AppTheme.accentOrange.withValues(alpha: 0.15)
+                  : AppTheme.primarySky.withValues(alpha: 0.1))
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? (isBoosted ? AppTheme.primaryAmber : AppTheme.primaryGold)
+                ? (isBoosted ? AppTheme.accentOrange : AppTheme.primarySky)
                 : const Color(0xFFE0E0E0),
             width: isSelected ? 2 : 1,
           ),
@@ -545,11 +545,11 @@ class _TypeChip extends StatelessWidget {
         child: Column(
           children: [
             if (isBoosted)
-              const Icon(Icons.star, color: AppTheme.primaryAmber, size: 20),
+              const Icon(Icons.star, color: AppTheme.accentOrange, size: 20),
             Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             Text(price,
-                style: const TextStyle(fontSize: 12, color: AppTheme.primaryDark)),
+                style: const TextStyle(fontSize: 12, color: AppTheme.primaryNavy)),
           ],
         ),
       ),

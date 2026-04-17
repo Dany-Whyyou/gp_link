@@ -73,7 +73,7 @@ class NotificationsScreen extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            color: AppTheme.primaryGold,
+            color: AppTheme.primarySky,
             onRefresh: () async => ref.invalidate(notificationsProvider),
             child: ListView.builder(
               itemCount: notifications.length,
@@ -158,13 +158,13 @@ class _NotificationTile extends StatelessWidget {
   Color _colorForType(String type) {
     switch (type) {
       case 'booking':
-        return AppTheme.accentBlue;
+        return AppTheme.primarySky;
       case 'alert_match':
-        return AppTheme.primaryGold;
+        return AppTheme.primarySky;
       case 'chat':
-        return AppTheme.accentGreen;
+        return AppTheme.gabonGreen;
       case 'payment':
-        return AppTheme.primaryAmber;
+        return AppTheme.accentOrange;
       default:
         return AppTheme.info;
     }
@@ -188,7 +188,7 @@ class _NotificationTile extends StatelessWidget {
         onTap: onTap,
         tileColor: notification.isRead
             ? null
-            : AppTheme.primaryGold.withValues(alpha: 0.05),
+            : AppTheme.primarySky.withValues(alpha: 0.05),
         leading: Container(
           width: 42,
           height: 42,
@@ -235,7 +235,7 @@ class _NotificationTile extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: const BoxDecoration(
-                  color: AppTheme.primaryGold,
+                  color: AppTheme.primarySky,
                   shape: BoxShape.circle,
                 ),
               ),

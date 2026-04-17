@@ -14,7 +14,7 @@ class LoadingWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryGold),
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primarySky),
             strokeWidth: 3,
           ),
           if (message != null) ...[

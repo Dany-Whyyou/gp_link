@@ -35,7 +35,7 @@ class AnnouncementCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppTheme.primaryGold, AppTheme.primaryAmber],
+                    colors: [AppTheme.primarySky, AppTheme.accentOrange],
                   ),
                 ),
                 child: const Row(
@@ -65,7 +65,7 @@ class AnnouncementCard extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.flight_takeoff,
-                          size: 18, color: AppTheme.accentGreen),
+                          size: 18, color: AppTheme.gabonGreen),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -76,10 +76,10 @@ class AnnouncementCard extends StatelessWidget {
                         ),
                       ),
                       const Icon(Icons.arrow_forward,
-                          size: 16, color: AppTheme.primaryGold),
+                          size: 16, color: AppTheme.primarySky),
                       const SizedBox(width: 6),
                       const Icon(Icons.flight_land,
-                          size: 18, color: AppTheme.accentBlue),
+                          size: 18, color: AppTheme.primarySky),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -132,20 +132,20 @@ class AnnouncementCard extends StatelessWidget {
                         label:
                             '${announcement.remainingKg.toStringAsFixed(1)} kg dispo',
                         color: announcement.hasSpace
-                            ? AppTheme.accentGreen
+                            ? AppTheme.gabonGreen
                             : AppTheme.error,
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryGold.withValues(alpha: 0.15),
+                          color: AppTheme.primarySky.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           '${announcement.pricePerKg.toStringAsFixed(0)} ${AppConstants.currencySymbol}/kg',
                           style: const TextStyle(
-                            color: AppTheme.primaryDark,
+                            color: AppTheme.primaryNavy,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -162,13 +162,13 @@ class AnnouncementCard extends StatelessWidget {
                         CircleAvatar(
                           radius: 14,
                           backgroundColor:
-                              AppTheme.primaryGold.withValues(alpha: 0.2),
+                              AppTheme.primarySky.withValues(alpha: 0.2),
                           child: Text(
                             announcement.traveler!.initials,
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryDark,
+                              color: AppTheme.primaryNavy,
                             ),
                           ),
                         ),
@@ -182,14 +182,14 @@ class AnnouncementCard extends StatelessWidget {
                         if (announcement.traveler!.isVerified) ...[
                           const SizedBox(width: 4),
                           const Icon(Icons.verified,
-                              size: 14, color: AppTheme.accentBlue),
+                              size: 14, color: AppTheme.primarySky),
                         ],
                         const Spacer(),
                         if (announcement.traveler!.rating > 0)
                           Row(
                             children: [
                               const Icon(Icons.star,
-                                  size: 14, color: AppTheme.primaryAmber),
+                                  size: 14, color: AppTheme.accentOrange),
                               const SizedBox(width: 2),
                               Text(
                                 announcement.traveler!.rating

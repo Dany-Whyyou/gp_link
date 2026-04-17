@@ -22,7 +22,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description:
           'Vous voyagez entre le Gabon et l\'international ? '
           'Rentabilisez vos kilos disponibles en transportant des colis.',
-      color: AppTheme.accentGreen,
+      color: AppTheme.gabonGreen,
     ),
     _OnboardingPage(
       icon: Icons.inventory_2,
@@ -30,7 +30,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description:
           'Trouvez un voyageur de confiance pour envoyer vos colis '
           'au Gabon ou à l\'étranger, rapidement et à moindre coût.',
-      color: AppTheme.accentBlue,
+      color: AppTheme.primarySky,
     ),
     _OnboardingPage(
       icon: Icons.security,
@@ -38,7 +38,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description:
           'Profils vérifiés, messagerie intégrée et paiement sécurisé '
           'par Mobile Money. Vos envois sont entre de bonnes mains.',
-      color: AppTheme.primaryGold,
+      color: AppTheme.primarySky,
     ),
   ];
 
@@ -90,7 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 effect: const WormEffect(
                   dotHeight: 10,
                   dotWidth: 10,
-                  activeDotColor: AppTheme.primaryGold,
+                  activeDotColor: AppTheme.primarySky,
                   dotColor: Color(0xFFD0D0D0),
                 ),
               ),

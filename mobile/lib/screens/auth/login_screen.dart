@@ -77,13 +77,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryGold.withValues(alpha: 0.12),
+                      color: AppTheme.primarySky.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.flight_takeoff,
                       size: 40,
-                      color: AppTheme.primaryGold,
+                      color: AppTheme.primarySky,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -91,7 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     AppConstants.appName,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryGold,
+                          color: AppTheme.primarySky,
                         ),
                     textAlign: TextAlign.center,
                   ),

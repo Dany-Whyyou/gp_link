@@ -36,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
             // Avatar
             CircleAvatar(
               radius: 48,
-              backgroundColor: AppTheme.primaryGold.withValues(alpha: 0.2),
+              backgroundColor: AppTheme.primarySky.withValues(alpha: 0.2),
               backgroundImage: profile.avatarUrl != null
                   ? NetworkImage(profile.avatarUrl!)
                   : null,
@@ -46,7 +46,7 @@ class ProfileScreen extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryDark,
+                        color: AppTheme.primaryNavy,
                       ),
                     )
                   : null,
@@ -66,7 +66,7 @@ class ProfileScreen extends ConsumerWidget {
                 if (profile.isVerified) ...[
                   const SizedBox(width: 6),
                   const Icon(Icons.verified,
-                      color: AppTheme.accentBlue, size: 20),
+                      color: AppTheme.primarySky, size: 20),
                 ],
               ],
             ),
@@ -75,16 +75,16 @@ class ProfileScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: profile.isVoyageur
-                    ? AppTheme.accentGreen.withValues(alpha: 0.15)
-                    : AppTheme.accentBlue.withValues(alpha: 0.15),
+                    ? AppTheme.gabonGreen.withValues(alpha: 0.15)
+                    : AppTheme.primarySky.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 profile.role.label,
                 style: TextStyle(
                   color: profile.isVoyageur
-                      ? AppTheme.accentGreen
-                      : AppTheme.accentBlue,
+                      ? AppTheme.gabonGreen
+                      : AppTheme.primarySky,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -282,7 +282,7 @@ class _StatCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: AppTheme.primaryGold, size: 22),
+            Icon(icon, color: AppTheme.primarySky, size: 22),
             const SizedBox(height: 8),
             Text(
               value,
@@ -346,7 +346,7 @@ class _InfoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
-      leading: Icon(icon, size: 20, color: AppTheme.primaryGold),
+      leading: Icon(icon, size: 20, color: AppTheme.primarySky),
       title: Text(label, style: const TextStyle(fontSize: 12)),
       trailing: Text(value,
           style: const TextStyle(fontWeight: FontWeight.w500)),
@@ -386,7 +386,7 @@ class _MenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, size: 22, color: AppTheme.primaryGold),
+      leading: Icon(icon, size: 22, color: AppTheme.primarySky),
       title: Text(label),
       trailing: const Icon(Icons.chevron_right, size: 20),
       onTap: onTap,

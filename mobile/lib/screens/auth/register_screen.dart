@@ -193,11 +193,11 @@ class _RoleCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primaryGold.withValues(alpha: 0.1)
+              ? AppTheme.primarySky.withValues(alpha: 0.1)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppTheme.primaryGold : const Color(0xFFE0E0E0),
+            color: isSelected ? AppTheme.primarySky : const Color(0xFFE0E0E0),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -208,13 +208,13 @@ class _RoleCard extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppTheme.primaryGold.withValues(alpha: 0.2)
+                    ? AppTheme.primarySky.withValues(alpha: 0.2)
                     : const Color(0xFFF0F0F0),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color: isSelected ? AppTheme.primaryGold : Colors.grey,
+                color: isSelected ? AppTheme.primarySky : Colors.grey,
               ),
             ),
             const SizedBox(width: 16),
@@ -228,7 +228,7 @@ class _RoleCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                       color: isSelected
-                          ? AppTheme.primaryGold
+                          ? AppTheme.primarySky
                           : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -247,7 +247,7 @@ class _RoleCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: AppTheme.primaryGold),
+              const Icon(Icons.check_circle, color: AppTheme.primarySky),
           ],
         ),
       ),

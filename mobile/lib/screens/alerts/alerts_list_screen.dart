@@ -40,7 +40,7 @@ class AlertsListScreen extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            color: AppTheme.primaryGold,
+            color: AppTheme.primarySky,
             onRefresh: () async => ref.invalidate(myAlertsProvider),
             child: ListView.builder(
               padding: const EdgeInsets.only(top: 8, bottom: 80),
@@ -140,13 +140,13 @@ class _AlertCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryGold.withValues(alpha: 0.15),
+                      color: AppTheme.primarySky.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '${alert.matchCount} match(es)',
                       style: const TextStyle(
-                          color: AppTheme.primaryDark,
+                          color: AppTheme.primaryNavy,
                           fontSize: 11,
                           fontWeight: FontWeight.w600),
                     ),
@@ -159,16 +159,16 @@ class _AlertCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(Icons.flight_takeoff,
-                    size: 16, color: AppTheme.accentGreen),
+                    size: 16, color: AppTheme.gabonGreen),
                 const SizedBox(width: 6),
                 Text(alert.departureCity ?? 'Toutes villes',
                     style: const TextStyle(fontWeight: FontWeight.w500)),
                 const SizedBox(width: 8),
                 const Icon(Icons.arrow_forward,
-                    size: 14, color: AppTheme.primaryGold),
+                    size: 14, color: AppTheme.primarySky),
                 const SizedBox(width: 8),
                 const Icon(Icons.flight_land,
-                    size: 16, color: AppTheme.accentBlue),
+                    size: 16, color: AppTheme.primarySky),
                 const SizedBox(width: 6),
                 Text(alert.arrivalCity ?? 'Toutes villes',
                     style: const TextStyle(fontWeight: FontWeight.w500)),

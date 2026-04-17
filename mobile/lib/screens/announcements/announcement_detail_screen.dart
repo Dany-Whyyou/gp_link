@@ -145,7 +145,7 @@ class _AnnouncementDetailScreenState
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [AppTheme.accentGreen, AppTheme.accentBlue],
+                      colors: [AppTheme.gabonGreen, AppTheme.primarySky],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -159,7 +159,7 @@ class _AnnouncementDetailScreenState
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryAmber,
+                            color: AppTheme.accentOrange,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Row(
@@ -351,12 +351,12 @@ class _AnnouncementDetailScreenState
                     leading: CircleAvatar(
                       radius: 24,
                       backgroundColor:
-                          AppTheme.primaryGold.withValues(alpha: 0.2),
+                          AppTheme.primarySky.withValues(alpha: 0.2),
                       child: Text(
                         announcement.traveler!.initials,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryDark,
+                          color: AppTheme.primaryNavy,
                         ),
                       ),
                     ),
@@ -366,7 +366,7 @@ class _AnnouncementDetailScreenState
                         if (announcement.traveler!.isVerified) ...[
                           const SizedBox(width: 6),
                           const Icon(Icons.verified,
-                              size: 18, color: AppTheme.accentBlue),
+                              size: 18, color: AppTheme.primarySky),
                         ],
                       ],
                     ),
@@ -439,7 +439,7 @@ class _AnnouncementDetailScreenState
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryGold.withValues(alpha: 0.1),
+                      color: AppTheme.primarySky.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -452,7 +452,7 @@ class _AnnouncementDetailScreenState
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryDark,
+                            color: AppTheme.primaryNavy,
                           ),
                         ),
                       ],
@@ -508,7 +508,7 @@ class _DetailRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppTheme.primaryGold),
+          Icon(icon, size: 20, color: AppTheme.primarySky),
           const SizedBox(width: 12),
           Text(label,
               style: TextStyle(

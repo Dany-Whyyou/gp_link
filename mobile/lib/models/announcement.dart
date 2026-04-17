@@ -4,9 +4,9 @@ import 'package:gp_link/models/profile.dart';
 class Announcement {
   final String id;
   final String userId;
-  final String departureCity;
+  final String? departureCity;
   final String departureCountry;
-  final String arrivalCity;
+  final String? arrivalCity;
   final String arrivalCountry;
   final DateTime departureDate;
   final DateTime? arrivalDate;
@@ -33,9 +33,9 @@ class Announcement {
   const Announcement({
     required this.id,
     required this.userId,
-    required this.departureCity,
+    this.departureCity,
     required this.departureCountry,
-    required this.arrivalCity,
+    this.arrivalCity,
     required this.arrivalCountry,
     required this.departureDate,
     this.arrivalDate,
@@ -67,9 +67,9 @@ class Announcement {
     return Announcement(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      departureCity: json['departure_city'] as String,
+      departureCity: json['departure_city'] as String?,
       departureCountry: json['departure_country'] as String? ?? 'Gabon',
-      arrivalCity: json['arrival_city'] as String,
+      arrivalCity: json['arrival_city'] as String?,
       arrivalCountry: json['arrival_country'] as String? ?? '',
       departureDate: DateTime.parse(json['departure_date'] as String),
       arrivalDate: json['arrival_date'] != null
@@ -103,7 +103,9 @@ class Announcement {
           ? DateTime.parse(json['expires_at'] as String)
           : null,
       createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : DateTime.parse(json['created_at'] as String),
       traveler: traveler,
     );
   }
@@ -137,9 +139,17 @@ class Announcement {
   bool get isActive => status == AnnouncementStatus.active;
   bool get isBoosted => type == AnnouncementType.boosted;
 
-  String get route => '$departureCity -> $arrivalCity';
-  String get routeFull =>
-      '$departureCity ($departureCountry) -> $arrivalCity ($arrivalCountry)';
+  String get route =>
+      '${departureCity ?? departureCountry} -> ${arrivalCity ?? arrivalCountry}';
+  String get routeFull {
+    final dep = departureCity != null
+        ? '$departureCity ($departureCountry)'
+        : departureCountry;
+    final arr = arrivalCity != null
+        ? '$arrivalCity ($arrivalCountry)'
+        : arrivalCountry;
+    return '$dep -> $arr';
+  }
 
   Announcement copyWith({
     double? availableKg,

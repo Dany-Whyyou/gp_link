@@ -41,7 +41,9 @@ class AnnouncementCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: announcement.isBoosted
+                  ? const Color(0xFFFFF7ED) // Orange très pâle
+                  : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: announcement.isBoosted
@@ -51,9 +53,9 @@ class AnnouncementCard extends ConsumerWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primaryNavy.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: AppTheme.primaryNavy.withValues(alpha: 0.06),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -83,13 +85,13 @@ class AnnouncementCard extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: AppTheme.primarySky.withValues(alpha: 0.12),
+                              color: AppTheme.accentOrange.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               '${announcement.pricePerKg.toStringAsFixed(0)} FCFA/kg',
                               style: const TextStyle(
-                                color: AppTheme.primaryNavy,
+                                color: AppTheme.accentOrangeDark,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 13,
                               ),
@@ -144,16 +146,6 @@ class AnnouncementCard extends ConsumerWidget {
   Widget _routeHero(Country? dep, Country? arr) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primarySky.withValues(alpha: 0.06),
-            AppTheme.primaryNavy.withValues(alpha: 0.03),
-          ],
-        ),
-      ),
       child: Row(
         children: [
           Expanded(

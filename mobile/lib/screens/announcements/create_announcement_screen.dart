@@ -460,10 +460,10 @@ class _FeeSummary extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.primarySky.withValues(alpha: 0.1),
+        color: const Color(0xFFFFF7ED), // orange très pâle
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: AppTheme.primarySky.withValues(alpha: 0.3)),
+            color: AppTheme.accentOrange.withValues(alpha: 0.4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

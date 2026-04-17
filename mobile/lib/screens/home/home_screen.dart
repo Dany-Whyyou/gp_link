@@ -10,6 +10,8 @@ import 'package:gp_link/screens/announcements/announcements_list_screen.dart';
 import 'package:gp_link/screens/alerts/alerts_list_screen.dart';
 import 'package:gp_link/screens/chat/conversations_list_screen.dart';
 import 'package:gp_link/screens/profile/profile_screen.dart';
+import 'package:gp_link/services/tutorial_service.dart';
+import 'package:gp_link/widgets/home_tutorial.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +30,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ProfileScreen(),
   ];
 
+  final _tutorialService = TutorialService();
+  final _keyAnnouncements = GlobalKey();
+  final _keyAlerts = GlobalKey();
+  final _keyMessages = GlobalKey();
+  final _keyProfile = GlobalKey();
+  final _keyFab = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowTutorial());
+  }
+
+  Future<void> _maybeShowTutorial() async {
+    final done = await _tutorialService.isHomeCompleted();
+    if (done || !mounted) return;
+    // Petit délai pour laisser les widgets se poser
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    HomeTutorial(
+      targets: HomeTutorialTargets(
+        announcementsTab: _keyAnnouncements,
+        alertsTab: _keyAlerts,
+        messagesTab: _keyMessages,
+        profileTab: _keyProfile,
+        publishFab: _keyFab,
+      ),
+      onFinish: _tutorialService.markHomeCompleted,
+    ).show(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final unreadChat = ref.watch(unreadChatCountProvider);
@@ -42,20 +75,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
         items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            activeIcon: Icon(Icons.search),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search, key: _keyAnnouncements),
+            activeIcon: const Icon(Icons.search),
             label: 'Annonces',
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_active_outlined),
-            activeIcon: Icon(Icons.notifications_active),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_active_outlined, key: _keyAlerts),
+            activeIcon: const Icon(Icons.notifications_active),
             label: 'Alertes',
           ),
           BottomNavigationBarItem(
             icon: _BadgeIcon(
               icon: Icons.chat_bubble_outline,
               count: unreadChat.valueOrNull ?? 0,
+              iconKey: _keyMessages,
             ),
             activeIcon: _BadgeIcon(
               icon: Icons.chat_bubble,
@@ -63,9 +97,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             label: 'Messages',
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline, key: _keyProfile),
+            activeIcon: const Icon(Icons.person),
             label: 'Profil',
           ),
         ],
@@ -87,6 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (profile == null) return null;
 
     return FloatingActionButton.extended(
+      key: _keyFab,
       backgroundColor: AppTheme.primarySky,
       onPressed: _onPublishTap,
       icon: const Icon(Icons.add, color: Colors.white),
@@ -172,15 +207,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _BadgeIcon extends StatelessWidget {
   final IconData icon;
   final int count;
+  final Key? iconKey;
 
-  const _BadgeIcon({required this.icon, required this.count});
+  const _BadgeIcon({required this.icon, required this.count, this.iconKey});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Icon(icon),
+        Icon(icon, key: iconKey),
         if (count > 0)
           Positioned(
             right: -6,

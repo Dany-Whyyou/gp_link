@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/auth_provider.dart';
+import 'package:gp_link/services/tutorial_service.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -188,6 +189,20 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.payment,
                   label: 'Mes paiements',
                   onTap: () {},
+                ),
+                _MenuItem(
+                  icon: Icons.school_outlined,
+                  label: 'Revoir le tutoriel',
+                  onTap: () async {
+                    await TutorialService().reset();
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Le tutoriel s\'affichera à la prochaine ouverture'),
+                      ),
+                    );
+                  },
                 ),
                 _MenuItem(
                   icon: Icons.help_outline,

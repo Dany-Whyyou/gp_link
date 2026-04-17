@@ -540,8 +540,12 @@ class _TypeChip extends StatelessWidget {
         ),
         child: Column(
           children: [
-            if (isBoosted)
-              const Icon(Icons.star, color: AppTheme.accentOrange, size: 20),
+            Icon(
+              isBoosted ? Icons.rocket_launch : Icons.flight_takeoff,
+              color: isBoosted ? AppTheme.accentOrange : AppTheme.primarySky,
+              size: 22,
+            ),
+            const SizedBox(height: 4),
             Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             Text(price,

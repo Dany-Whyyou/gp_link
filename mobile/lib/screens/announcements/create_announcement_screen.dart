@@ -7,6 +7,7 @@ import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/announcement_provider.dart';
 import 'package:gp_link/providers/app_config_provider.dart';
+import 'package:gp_link/providers/free_offer_provider.dart';
 import 'package:gp_link/services/app_config_service.dart';
 import 'package:gp_link/services/payment_service.dart';
 import 'package:gp_link/widgets/country_picker.dart';
@@ -96,19 +97,25 @@ class _CreateAnnouncementScreenState
       return;
     }
 
-    // Check for existing active announcement
     final hasActive = await ref.read(hasActiveAnnouncementProvider.future);
-    if (hasActive) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Vous avez déjà une annonce active. Limite: ${AppConstants.maxActiveAnnouncements} annonce(s).'),
-            backgroundColor: AppTheme.error,
-          ),
-        );
-      }
-      return;
+    final freeOffer = await ref.read(freeOfferProvider.future);
+    final pricing = ref.read(pricingProvider).value ?? Pricing.defaults();
+
+    // Détermine le type de paiement et le montant
+    final String paymentType;
+    final int amount;
+    if (_type == AnnouncementType.boosted) {
+      paymentType = 'boost';
+      amount = pricing.boostedAnnouncement;
+    } else if (freeOffer.hasFreeFirst || freeOffer.promoRemaining > 0) {
+      paymentType = 'announcement';
+      amount = 0;
+    } else if (hasActive) {
+      paymentType = 'extra_announcement';
+      amount = pricing.extraAnnouncement;
+    } else {
+      paymentType = 'announcement';
+      amount = pricing.standardAnnouncement;
     }
 
     setState(() => _isSubmitting = true);
@@ -136,22 +143,17 @@ class _CreateAnnouncementScreenState
       ref.invalidate(announcementsProvider);
       ref.invalidate(myAnnouncementsProvider);
 
-      final pricing =
-          ref.read(pricingProvider).value ?? Pricing.defaults();
-      final amount = pricing.priceFor(_type);
-
       if (amount <= 0) {
-        // Publication gratuite : appelle directement l'Edge Function
-        // qui active l'annonce sans passer par MyPvit
-        final service = PaymentService();
-        await service.initiatePayment(
+        final paymentService = PaymentService();
+        await paymentService.initiatePayment(
           announcementId: announcement.id,
-          paymentType: _type == AnnouncementType.boosted ? 'boost' : 'announcement',
+          paymentType: paymentType,
           operator: MobileMoneyOperator.test,
           phoneNumber: '',
         );
         ref.invalidate(announcementsProvider);
         ref.invalidate(myAnnouncementsProvider);
+        ref.invalidate(freeOfferProvider);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -167,7 +169,7 @@ class _CreateAnnouncementScreenState
       if (mounted) {
         context.pushReplacement('/payments/new', extra: {
           'announcement_id': announcement.id,
-          'payment_type': _type == AnnouncementType.boosted ? 'boost' : 'announcement',
+          'payment_type': paymentType,
           'amount': amount,
           'label': 'Publication ${_type.label}',
         });
@@ -430,60 +432,96 @@ class _CreateAnnouncementScreenState
 
                 const SizedBox(height: 24),
 
-                // Price summary
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primarySky.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: AppTheme.primarySky.withValues(alpha: 0.3)),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Frais de publication'),
-                          Text(
-                            '${(ref.watch(pricingProvider).value ?? Pricing.defaults()).priceFor(_type)} ${AppConstants.currencySymbol}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: AppTheme.primaryNavy,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_type == AnnouncementType.boosted)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 4),
-                          child: Text(
-                            'Votre annonce sera mise en avant pendant 7 jours',
-                            style: TextStyle(fontSize: 12, color: AppTheme.primarySky),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                // Frais de publication : dynamique selon contexte
+                _FeeSummary(selectedType: _type),
                 const SizedBox(height: 20),
 
-                Consumer(
-                  builder: (context, ref, _) {
-                    final pricing =
-                        ref.watch(pricingProvider).value ?? Pricing.defaults();
-                    return ElevatedButton(
-                      onPressed: _isSubmitting ? null : _submit,
-                      child: Text(
-                          'Publier (${pricing.priceFor(_type)} ${AppConstants.currencySymbol})'),
-                    );
-                  },
+                ElevatedButton(
+                  onPressed: _isSubmitting ? null : _submit,
+                  child: const Text('Publier'),
                 ),
                 const SizedBox(height: 40),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _FeeSummary extends ConsumerWidget {
+  final AnnouncementType selectedType;
+
+  const _FeeSummary({required this.selectedType});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pricing = ref.watch(pricingProvider).value ?? Pricing.defaults();
+    final hasActiveAsync = ref.watch(hasActiveAnnouncementProvider);
+    final freeOfferAsync = ref.watch(freeOfferProvider);
+
+    final hasActive = hasActiveAsync.valueOrNull ?? false;
+    final freeFirst = freeOfferAsync.valueOrNull?.hasFreeFirst ?? false;
+    final promoRemaining = freeOfferAsync.valueOrNull?.promoRemaining ?? 0;
+
+    int amount;
+    String? notice;
+
+    if (selectedType == AnnouncementType.boosted) {
+      amount = pricing.boostedAnnouncement;
+      notice = 'Votre annonce sera mise en avant pendant 7 jours';
+    } else if (freeFirst) {
+      amount = 0;
+      notice = 'Offre de bienvenue : votre première annonce est gratuite.';
+    } else if (promoRemaining > 0) {
+      amount = 0;
+      notice =
+          'Promotion en cours : $promoRemaining annonce${promoRemaining > 1 ? "s" : ""} gratuite${promoRemaining > 1 ? "s" : ""} restante${promoRemaining > 1 ? "s" : ""}.';
+    } else if (hasActive) {
+      amount = pricing.extraAnnouncement;
+      notice =
+          'Vous avez déjà une annonce active, celle-ci sera tarifée comme annonce supplémentaire.';
+    } else {
+      amount = pricing.standardAnnouncement;
+      notice = null;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.primarySky.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+            color: AppTheme.primarySky.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Frais de publication',
+                  style: TextStyle(fontWeight: FontWeight.w500)),
+              Text(
+                '$amount ${pricing.currencySymbol}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: AppTheme.primaryNavy,
+                ),
+              ),
+            ],
+          ),
+          if (notice != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              notice,
+              style: TextStyle(
+                  fontSize: 12, color: Colors.grey.shade700, height: 1.4),
+            ),
+          ],
+        ],
       ),
     );
   }

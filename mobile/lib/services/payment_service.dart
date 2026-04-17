@@ -68,10 +68,21 @@ class PaymentService {
       }),
     );
 
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    if (response.statusCode != 200) {
+    Map<String, dynamic> body;
+    try {
+      body = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
       throw PaymentException(
-        body['error'] as String? ?? 'Erreur de paiement',
+        'Réponse invalide (${response.statusCode}) : ${response.body}',
+      );
+    }
+    if (response.statusCode != 200) {
+      final err = body['error']?.toString() ??
+          body['msg']?.toString() ??
+          body['message']?.toString() ??
+          'Erreur de paiement';
+      throw PaymentException(
+        '[${response.statusCode}] $err',
         body['details'] as Map<String, dynamic>?,
       );
     }

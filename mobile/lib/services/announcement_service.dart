@@ -116,7 +116,7 @@ class AnnouncementService {
       'departure_date': departureDate.toIso8601String(),
       'arrival_date': arrivalDate?.toIso8601String(),
       'available_kg': availableKg,
-      'price_per_kg': pricePerKg,
+      'price_per_kg': pricePerKg.toInt(),
       'booked_kg': 0,
       'type': type.name,
       'status': AnnouncementStatus.pendingPayment.value,

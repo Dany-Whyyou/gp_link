@@ -16,12 +16,25 @@ import 'package:gp_link/screens/notifications/notifications_screen.dart';
 import 'package:gp_link/screens/payments/payment_screen.dart';
 import 'package:gp_link/screens/payments/payment_polling_screen.dart';
 
+/// Notifier qui déclenche un refresh du router quand authProvider change,
+/// SANS recréer le GoRouter (qui perdrait le state des écrans).
+class _AuthRefreshNotifier extends ChangeNotifier {
+  _AuthRefreshNotifier(Ref ref) {
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.status != next.status) {
+        notifyListeners();
+      }
+    });
+  }
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final refresh = _AuthRefreshNotifier(ref);
 
   return GoRouter(
     initialLocation: '/home',
     debugLogDiagnostics: true,
+    refreshListenable: refresh,
     redirect: (context, state) async {
       final path = state.uri.path;
       final isOnboarding = path == '/onboarding';
@@ -35,7 +48,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         if (!onboardingComplete) return '/onboarding';
       }
 
-      // Auth redirects
+      final authState = ref.read(authProvider);
+
       if (authState.status == AuthStatus.unauthenticated) {
         if (!isAuth && !isOnboarding) return '/login';
       }

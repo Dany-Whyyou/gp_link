@@ -9,13 +9,16 @@ class AppConstants {
   static const String currencySymbol = 'FCFA';
 
   // -- Supabase --
+  // URL et anon key sont publics par design (RLS policies contrôlent l'accès).
+  // Override possible via --dart-define=SUPABASE_URL=... au build.
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
     defaultValue: 'https://vppdjobdmeuoqnqlxaez.supabase.co',
   );
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: '',
+    defaultValue:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwcGRqb2JkbWV1b3FucWx4YWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzODA5OTQsImV4cCI6MjA5MTk1Njk5NH0.g9Sw7q7Hl3gZzYlaXb4h6omBEs2goUS6viCzZU-2k70',
   );
 
   // -- MyPvit --

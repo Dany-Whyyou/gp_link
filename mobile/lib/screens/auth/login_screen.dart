@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
@@ -72,19 +73,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   const SizedBox(height: 40),
 
-                  // Logo / Title
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppTheme.primarySky.withValues(alpha: 0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.flight_takeoff,
-                      size: 40,
-                      color: AppTheme.primarySky,
-                    ),
+                  // Logo
+                  SvgPicture.asset(
+                    'assets/logo/logo_v1_monogram.svg',
+                    width: 96,
+                    height: 96,
                   ),
                   const SizedBox(height: 24),
                   Text(

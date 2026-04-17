@@ -5,6 +5,14 @@ import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/auth_provider.dart';
 import 'package:gp_link/services/tutorial_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+Future<void> _openExternalUrl(String url) async {
+  final uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+}
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -207,12 +215,37 @@ class ProfileScreen extends ConsumerWidget {
                 _MenuItem(
                   icon: Icons.help_outline,
                   label: 'Aide et support',
-                  onTap: () {},
+                  onTap: () => _openExternalUrl(AppConstants.supportUrl),
+                ),
+                _MenuItem(
+                  icon: Icons.description_outlined,
+                  label: 'Conditions Générales d\'Utilisation',
+                  onTap: () => _openExternalUrl(AppConstants.termsUrl),
+                ),
+                _MenuItem(
+                  icon: Icons.privacy_tip_outlined,
+                  label: 'Politique de confidentialité',
+                  onTap: () => _openExternalUrl(AppConstants.privacyUrl),
                 ),
                 _MenuItem(
                   icon: Icons.info_outline,
                   label: 'À propos',
-                  onTap: () {},
+                  onTap: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: AppConstants.appName,
+                      applicationVersion: '1.0.0',
+                      applicationLegalese:
+                          '© ${DateTime.now().year} Dadel, Libreville Gabon.\nTous droits réservés.',
+                      children: const [
+                        SizedBox(height: 12),
+                        Text(
+                          'GP Link est une plateforme de mise en relation entre voyageurs et expéditeurs de colis.',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),

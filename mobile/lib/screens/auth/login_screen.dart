@@ -32,6 +32,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     ref.read(authProvider.notifier).clearError();
     await ref.read(authProvider.notifier).sendOtp(_phoneController.text.trim());
+    if (!mounted) return;
     final state = ref.read(authProvider);
     if (state.error == null) {
       setState(() => _otpSent = true);
@@ -45,7 +46,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _phoneController.text.trim(),
           _otpController.text.trim(),
         );
-    if (success && mounted) {
+    if (!mounted) return;
+    if (success) {
       final authState = ref.read(authProvider);
       if (authState.status == AuthStatus.needsProfile) {
         context.go('/register');
@@ -134,7 +136,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ],
                       decoration: InputDecoration(
                         labelText: 'Numéro de téléphone',
-                        hintText: '07 XX XX XX',
+                        hintText: '77 XX XX XX',
+                        helperText: 'Ne tapez pas le 0 au début',
                         prefixIcon: const Icon(Icons.phone),
                         prefixText: '${AppConstants.defaultCountryCode} ',
                         prefixStyle: const TextStyle(
@@ -146,8 +149,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Veuillez entrer votre numéro';
                         }
-                        if (value.length < 7) {
-                          return 'Numéro trop court';
+                        final digits = value.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^0+'), '');
+                        if (digits.length < 8) {
+                          return 'Numéro invalide (8 chiffres attendus)';
                         }
                         return null;
                       },

@@ -6,19 +6,23 @@ import 'package:gp_link/services/supabase_service.dart';
 class AuthService {
   final _auth = SupabaseService.auth;
 
+  /// Normalize a Gabon phone number to E.164 format (+241XXXXXXXX).
+  /// Strips leading zeros (national trunk prefix) before adding country code.
+  String _normalizePhone(String phone) {
+    if (phone.startsWith('+')) return phone;
+    final stripped = phone.replaceAll(RegExp(r'[\s-]'), '').replaceFirst(RegExp(r'^0+'), '');
+    return '${AppConstants.defaultCountryCode}$stripped';
+  }
+
   /// Send OTP to phone number for sign in / sign up.
   Future<void> sendOtp(String phone) async {
-    final fullPhone =
-        phone.startsWith('+') ? phone : '${AppConstants.defaultCountryCode}$phone';
-    await _auth.signInWithOtp(phone: fullPhone);
+    await _auth.signInWithOtp(phone: _normalizePhone(phone));
   }
 
   /// Verify the OTP code.
   Future<AuthResponse> verifyOtp(String phone, String code) async {
-    final fullPhone =
-        phone.startsWith('+') ? phone : '${AppConstants.defaultCountryCode}$phone';
     return await _auth.verifyOTP(
-      phone: fullPhone,
+      phone: _normalizePhone(phone),
       token: code,
       type: OtpType.sms,
     );

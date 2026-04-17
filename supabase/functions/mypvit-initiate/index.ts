@@ -146,19 +146,28 @@ async function resolveAmount(
   supabase: ReturnType<typeof createClient>,
   paymentType: PaymentType,
 ): Promise<number> {
+  const keyByType: Record<PaymentType, string> = {
+    announcement: "price_standard",
+    boost: "price_boosted",
+    extension: "price_extension",
+    extra_announcement: "price_extra_kg",
+  };
+  const defaultByType: Record<PaymentType, number> = {
+    announcement: 1500,
+    boost: 3000,
+    extension: 1000,
+    extra_announcement: 2000,
+  };
+  const key = keyByType[paymentType];
   const { data } = await supabase
     .from("app_config")
     .select("value")
-    .eq("key", "pricing")
-    .single();
-  const pricing = data?.value ?? {};
-  const p = pricing as Record<string, number>;
-  switch (paymentType) {
-    case "announcement": return p.standard_announcement ?? 1500;
-    case "boost": return p.boosted_announcement ?? 3000;
-    case "extension": return p.extension ?? 1000;
-    case "extra_announcement": return p.extra_announcement ?? 2000;
-  }
+    .eq("key", key)
+    .maybeSingle();
+  const raw = data?.value;
+  const parsed = typeof raw === "string" ? parseInt(raw, 10) : Number(raw);
+  if (Number.isFinite(parsed)) return parsed;
+  return defaultByType[paymentType];
 }
 
 async function getUserIdFromRequest(req: Request): Promise<string | null> {
@@ -200,11 +209,8 @@ serve(async (req: Request) => {
   }
 
   const { announcement_id, payment_type, operator, phone_number } = body;
-  if (!announcement_id || !payment_type || !operator || !phone_number) {
+  if (!announcement_id || !payment_type) {
     return jsonResponse({ error: "Missing fields" }, 400);
-  }
-  if (!["AIRTEL_MONEY", "MOOV_MONEY", "TEST"].includes(operator)) {
-    return jsonResponse({ error: "Invalid operator" }, 400);
   }
   if (!["announcement", "boost", "extension", "extra_announcement"].includes(payment_type)) {
     return jsonResponse({ error: "Invalid payment_type" }, 400);
@@ -222,6 +228,16 @@ serve(async (req: Request) => {
   }
 
   const amount = await resolveAmount(supabase, payment_type);
+
+  // Si amount > 0, operator + phone requis
+  if (amount > 0) {
+    if (!operator || !phone_number) {
+      return jsonResponse({ error: "Operator and phone required for paid announcement" }, 400);
+    }
+    if (!["AIRTEL_MONEY", "MOOV_MONEY", "TEST"].includes(operator)) {
+      return jsonResponse({ error: "Invalid operator" }, 400);
+    }
+  }
   const reference = generateReference(userId);
   const account = accountForOperator(operator);
 
@@ -233,10 +249,10 @@ serve(async (req: Request) => {
       type: payment_type,
       amount,
       currency: "XAF",
-      provider: "mypvit",
+      provider: amount > 0 ? "mypvit" : "free",
       reference,
-      operator,
-      phone_number,
+      operator: amount > 0 ? operator : null,
+      phone_number: amount > 0 ? phone_number : null,
       status: "pending",
       metadata: { initiated_at: new Date().toISOString() },
     })
@@ -246,6 +262,61 @@ serve(async (req: Request) => {
   if (insertError || !paymentRow) {
     console.error("mypvit-initiate: DB insert failed", insertError);
     return jsonResponse({ error: "Failed to create payment" }, 500);
+  }
+
+  // Fast-path : amount = 0 → pas de paiement MyPvit, activation directe
+  if (amount <= 0) {
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await supabase.from("payments").update({
+      status: "completed",
+      paid_at: now.toISOString(),
+      payment_method: "free",
+    }).eq("id", paymentRow.id);
+
+    const annUpdate: Record<string, any> = {};
+    if (payment_type === "extension") {
+      const { data: currentAnn } = await supabase
+        .from("announcements").select("expires_at").eq("id", announcement_id).single();
+      const base = currentAnn?.expires_at
+        ? new Date(Math.max(new Date(currentAnn.expires_at).getTime(), now.getTime()))
+        : new Date(now);
+      base.setDate(base.getDate() + 7);
+      annUpdate.expires_at = base.toISOString();
+    } else {
+      annUpdate.status = "active";
+      annUpdate.published_at = now.toISOString();
+      annUpdate.expires_at = expiresAt.toISOString();
+      if (payment_type === "boost") annUpdate.type = "boosted";
+    }
+    await supabase.from("announcements").update(annUpdate).eq("id", announcement_id);
+
+    if (payment_type === "announcement" || payment_type === "boost") {
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/match-alerts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+          body: JSON.stringify({ announcement_id }),
+        });
+      } catch (e) {
+        console.error("match-alerts trigger failed", e);
+      }
+    }
+
+    return jsonResponse({
+      payment_id: paymentRow.id,
+      reference,
+      amount: 0,
+      currency: "XAF",
+      mypvit_transaction_id: null,
+      status: "completed",
+      message: "Annonce publiée gratuitement.",
+    }, 200);
   }
 
   try {

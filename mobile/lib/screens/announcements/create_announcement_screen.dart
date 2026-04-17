@@ -8,6 +8,7 @@ import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/announcement_provider.dart';
 import 'package:gp_link/providers/app_config_provider.dart';
 import 'package:gp_link/services/app_config_service.dart';
+import 'package:gp_link/services/payment_service.dart';
 import 'package:gp_link/widgets/country_picker.dart';
 import 'package:gp_link/widgets/loading_widget.dart';
 
@@ -139,10 +140,34 @@ class _CreateAnnouncementScreenState
           ref.read(pricingProvider).value ?? Pricing.defaults();
       final amount = pricing.priceFor(_type);
 
+      if (amount <= 0) {
+        // Publication gratuite : appelle directement l'Edge Function
+        // qui active l'annonce sans passer par MyPvit
+        final service = PaymentService();
+        await service.initiatePayment(
+          announcementId: announcement.id,
+          paymentType: _type == AnnouncementType.boosted ? 'boost' : 'announcement',
+          operator: MobileMoneyOperator.test,
+          phoneNumber: '',
+        );
+        ref.invalidate(announcementsProvider);
+        ref.invalidate(myAnnouncementsProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Annonce publiée avec succès !'),
+              backgroundColor: AppTheme.success,
+            ),
+          );
+          context.go('/home');
+        }
+        return;
+      }
+
       if (mounted) {
         context.pushReplacement('/payments/new', extra: {
           'announcement_id': announcement.id,
-          'payment_type': 'announcement',
+          'payment_type': _type == AnnouncementType.boosted ? 'boost' : 'announcement',
           'amount': amount,
           'label': 'Publication ${_type.label}',
         });

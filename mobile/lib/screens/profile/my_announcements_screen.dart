@@ -5,6 +5,7 @@ import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/models/announcement.dart';
 import 'package:gp_link/providers/announcement_provider.dart';
+import 'package:gp_link/services/announcement_service.dart';
 import 'package:intl/intl.dart';
 
 class MyAnnouncementsScreen extends ConsumerWidget {
@@ -72,7 +73,98 @@ class MyAnnouncementsScreen extends ConsumerWidget {
 
 class _AnnCard extends StatelessWidget {
   final Announcement ann;
-  const _AnnCard({required this.ann});
+  final VoidCallback onAction;
+  const _AnnCard({required this.ann, required this.onAction});
+
+  Future<void> _handleAction(BuildContext context, String action) async {
+    final service = AnnouncementService();
+    try {
+      if (action == 'delete') {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Supprimer cette annonce ?'),
+            content: const Text('Cette action est irréversible.'),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Annuler')),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Supprimer',
+                    style: TextStyle(color: AppTheme.error)),
+              ),
+            ],
+          ),
+        );
+        if (confirm != true) return;
+        await service.delete(ann.id);
+      } else if (action == 'suspend') {
+        await service.suspend(ann.id);
+      } else if (action == 'reactivate') {
+        await service.reactivate(ann.id);
+      } else if (action == 'complete') {
+        await service.complete(ann.id);
+      }
+      onAction();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Action effectuée'),
+              backgroundColor: AppTheme.success),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Erreur : $e'),
+              backgroundColor: AppTheme.error),
+        );
+      }
+    }
+  }
+
+  List<PopupMenuEntry<String>> _menuItems() {
+    final items = <PopupMenuEntry<String>>[];
+    if (ann.status == AnnouncementStatus.active) {
+      items.add(const PopupMenuItem(
+        value: 'suspend',
+        child: ListTile(
+          leading: Icon(Icons.pause_circle_outline),
+          title: Text('Désactiver'),
+          dense: true,
+        ),
+      ));
+      items.add(const PopupMenuItem(
+        value: 'complete',
+        child: ListTile(
+          leading: Icon(Icons.check_circle_outline),
+          title: Text('Marquer comme terminée'),
+          dense: true,
+        ),
+      ));
+    }
+    if (ann.status == AnnouncementStatus.suspended) {
+      items.add(const PopupMenuItem(
+        value: 'reactivate',
+        child: ListTile(
+          leading: Icon(Icons.play_circle_outline),
+          title: Text('Réactiver'),
+          dense: true,
+        ),
+      ));
+    }
+    items.add(const PopupMenuItem(
+      value: 'delete',
+      child: ListTile(
+        leading: Icon(Icons.delete_outline, color: AppTheme.error),
+        title: Text('Supprimer', style: TextStyle(color: AppTheme.error)),
+        dense: true,
+      ),
+    ));
+    return items;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +192,12 @@ class _AnnCard extends StatelessWidget {
                   ),
                 ),
                 _StatusBadge(status: ann.status),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, size: 20),
+                  padding: EdgeInsets.zero,
+                  onSelected: (value) => _handleAction(context, value),
+                  itemBuilder: (_) => _menuItems(),
+                ),
               ],
             ),
             const SizedBox(height: 8),

@@ -168,12 +168,23 @@ class AnnouncementService {
     return update(id, {'status': AnnouncementStatus.completed.value});
   }
 
-  /// Delete (only if pending payment).
+  /// Supprime une annonce (uniquement celles de l'utilisateur courant).
   Future<void> delete(String id) async {
+    final userId = SupabaseService.currentUserId!;
     await SupabaseService.from(_table)
         .delete()
         .eq('id', id)
-        .eq('status', AnnouncementStatus.pendingPayment.value);
+        .eq('user_id', userId);
+  }
+
+  /// Désactive une annonce active (status → suspended).
+  Future<Announcement> suspend(String id) async {
+    return update(id, {'status': AnnouncementStatus.suspended.value});
+  }
+
+  /// Réactive une annonce suspendue.
+  Future<Announcement> reactivate(String id) async {
+    return update(id, {'status': AnnouncementStatus.active.value});
   }
 
   /// Search cities from the cities table.

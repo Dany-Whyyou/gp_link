@@ -195,7 +195,7 @@ export default function ReportsPage() {
 
       <DataTable
         columns={columns}
-        data={reports as unknown as Record<string, unknown>[]}
+        data={reports}
         keyField="id"
         loading={loading}
         emptyMessage="Aucun signalement"

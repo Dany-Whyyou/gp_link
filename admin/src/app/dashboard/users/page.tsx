@@ -186,7 +186,7 @@ export default function UsersPage() {
 
       <DataTable
         columns={columns}
-        data={users as unknown as Record<string, unknown>[]}
+        data={users}
         keyField="id"
         loading={loading}
         emptyMessage="Aucun utilisateur trouve"

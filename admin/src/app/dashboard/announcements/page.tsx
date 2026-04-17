@@ -165,7 +165,7 @@ export default function AnnouncementsPage() {
 
       <DataTable
         columns={columns}
-        data={announcements as unknown as Record<string, unknown>[]}
+        data={announcements}
         keyField="id"
         loading={loading}
         emptyMessage="Aucune annonce trouvee"

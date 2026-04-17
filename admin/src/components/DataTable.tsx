@@ -18,7 +18,7 @@ interface DataTableProps<T> {
   loading?: boolean;
 }
 
-export default function DataTable<T extends Record<string, unknown>>({
+export default function DataTable<T>({
   columns,
   data,
   keyField,
@@ -40,8 +40,8 @@ export default function DataTable<T extends Record<string, unknown>>({
 
   const sortedData = sortKey
     ? [...data].sort((a, b) => {
-        const aVal = a[sortKey];
-        const bVal = b[sortKey];
+        const aVal = (a as Record<string, unknown>)[sortKey];
+        const bVal = (b as Record<string, unknown>)[sortKey];
         if (aVal == null) return 1;
         if (bVal == null) return -1;
         const cmp = String(aVal).localeCompare(String(bVal));
@@ -99,23 +99,26 @@ export default function DataTable<T extends Record<string, unknown>>({
                 </td>
               </tr>
             ) : (
-              sortedData.map((item) => (
-                <tr
-                  key={String(item[keyField])}
-                  className={`hover:bg-gray-50 transition-colors ${
-                    onRowClick ? "cursor-pointer" : ""
-                  }`}
-                  onClick={() => onRowClick?.(item)}
-                >
-                  {columns.map((col) => (
-                    <td key={col.key} className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
-                      {col.render
-                        ? col.render(item)
-                        : String(item[col.key] ?? "-")}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              sortedData.map((item) => {
+                const row = item as Record<string, unknown>;
+                return (
+                  <tr
+                    key={String(row[keyField])}
+                    className={`hover:bg-gray-50 transition-colors ${
+                      onRowClick ? "cursor-pointer" : ""
+                    }`}
+                    onClick={() => onRowClick?.(item)}
+                  >
+                    {columns.map((col) => (
+                      <td key={col.key} className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">
+                        {col.render
+                          ? col.render(item)
+                          : String(row[col.key] ?? "-")}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

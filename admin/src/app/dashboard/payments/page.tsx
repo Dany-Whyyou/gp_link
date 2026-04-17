@@ -191,7 +191,7 @@ export default function PaymentsPage() {
 
       <DataTable
         columns={columns}
-        data={payments as unknown as Record<string, unknown>[]}
+        data={payments}
         keyField="id"
         loading={loading}
         emptyMessage="Aucun paiement trouve"

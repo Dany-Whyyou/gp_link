@@ -93,10 +93,10 @@ export default function SettingsPage() {
   const announcementKeys = ["announcement_duration_days", "max_kg_per_announcement", "auto_expire_enabled"];
   const moderationKeys = ["moderation_auto_suspend_reports"];
 
-  const allKeys = [...new Set([
+  const allKeys = Array.from(new Set([
     ...DEFAULT_CONFIGS.map((d) => d.key),
     ...configs.map((c) => c.key),
-  ])];
+  ]));
   const otherKeys = allKeys.filter(
     (k) => !pricingKeys.includes(k) && !announcementKeys.includes(k) && !moderationKeys.includes(k)
   );

@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
+import 'package:gp_link/providers/auth_provider.dart';
 import 'package:gp_link/services/payment_service.dart';
+
+enum _PaymentChoice { airtel, moov, store }
 
 class PaymentScreen extends ConsumerStatefulWidget {
   final String announcementId;
@@ -27,7 +32,7 @@ class PaymentScreen extends ConsumerStatefulWidget {
 class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  MobileMoneyOperator _operator = MobileMoneyOperator.airtel;
+  _PaymentChoice _choice = _PaymentChoice.airtel;
   bool _isSubmitting = false;
 
   @override
@@ -36,7 +41,16 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     super.dispose();
   }
 
+  bool get _isGabon {
+    final profile = ref.read(authProvider).profile;
+    return profile?.country == 'Gabon';
+  }
+
+  bool get _isMobileMoney =>
+      _choice == _PaymentChoice.airtel || _choice == _PaymentChoice.moov;
+
   String? _validatePhone(String? v) {
+    if (!_isMobileMoney) return null;
     if (v == null || v.trim().isEmpty) return 'Numéro requis';
     final digits = v.replaceAll(RegExp(r'\D'), '');
     if (digits.length < 8) return 'Numéro invalide';
@@ -44,14 +58,23 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   }
 
   Future<void> _submit() async {
+    if (_choice == _PaymentChoice.store) {
+      _showStoreDialog();
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isSubmitting = true);
     try {
+      final operator = _choice == _PaymentChoice.airtel
+          ? MobileMoneyOperator.airtel
+          : MobileMoneyOperator.moov;
+
       final service = PaymentService();
       final result = await service.initiatePayment(
         announcementId: widget.announcementId,
         paymentType: widget.paymentType,
-        operator: _operator,
+        operator: operator,
         phoneNumber: _phoneController.text.trim().replaceAll(RegExp(r'\D'), ''),
       );
       if (!mounted) return;
@@ -71,8 +94,34 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
     }
   }
 
+  void _showStoreDialog() {
+    final storeName = Platform.isIOS ? 'Apple Pay' : 'Google Play';
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Paiement $storeName'),
+        content: const Text(
+          'Le paiement via le store natif sera bientôt disponible. En attendant, contactez-nous pour effectuer votre paiement manuellement.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isGabon = _isGabon;
+
+    // Si l'user n'est pas au Gabon, on pré-sélectionne le store
+    if (!isGabon && _isMobileMoney) {
+      _choice = _PaymentChoice.store;
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Paiement')),
       body: SafeArea(
@@ -88,11 +137,13 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   decoration: BoxDecoration(
                     color: AppTheme.primarySky.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.primarySky.withValues(alpha: 0.3)),
+                    border:
+                        Border.all(color: AppTheme.primarySky.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     children: [
-                      Text(widget.label, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Text(widget.label,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Text(
                         '${widget.amount} ${AppConstants.currencySymbol}',
@@ -107,61 +158,113 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text('Moyen de paiement',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    style:
+                        TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 const SizedBox(height: 8),
-                _OperatorOption(
-                  operator: MobileMoneyOperator.airtel,
-                  selected: _operator == MobileMoneyOperator.airtel,
-                  onTap: () => setState(() => _operator = MobileMoneyOperator.airtel),
-                ),
-                const SizedBox(height: 8),
-                _OperatorOption(
-                  operator: MobileMoneyOperator.moov,
-                  selected: _operator == MobileMoneyOperator.moov,
-                  onTap: () => setState(() => _operator = MobileMoneyOperator.moov),
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(
-                    labelText: 'Numéro Mobile Money',
-                    hintText: 'Ex: 077000001',
-                    prefixIcon: Icon(Icons.phone, size: 18),
+
+                if (isGabon) ...[
+                  _ChoiceOption(
+                    icon: Icons.phone_android,
+                    label: 'Airtel Money',
+                    selected: _choice == _PaymentChoice.airtel,
+                    onTap: () =>
+                        setState(() => _choice = _PaymentChoice.airtel),
                   ),
-                  validator: _validatePhone,
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 8),
+                  _ChoiceOption(
+                    icon: Icons.smartphone,
+                    label: 'Moov Money',
+                    selected: _choice == _PaymentChoice.moov,
+                    onTap: () =>
+                        setState(() => _choice = _PaymentChoice.moov),
                   ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.info_outline, size: 18, color: Colors.blue),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Vous recevrez une demande de confirmation sur votre téléphone. Entrez votre code PIN pour valider.',
-                          style: TextStyle(fontSize: 12),
+                  const SizedBox(height: 8),
+                ],
+
+                _ChoiceOption(
+                  icon: Platform.isIOS ? Icons.apple : Icons.shop,
+                  label: Platform.isIOS
+                      ? 'Apple Pay (App Store)'
+                      : 'Google Play',
+                  selected: _choice == _PaymentChoice.store,
+                  onTap: () => setState(() => _choice = _PaymentChoice.store),
+                ),
+
+                if (!isGabon) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info_outline,
+                            size: 18, color: Colors.orange),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Le Mobile Money est disponible uniquement au Gabon. Vous pouvez payer via le store de votre téléphone.',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
+
                 const SizedBox(height: 24),
+
+                if (_isMobileMoney) ...[
+                  TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: const InputDecoration(
+                      labelText: 'Numéro Mobile Money',
+                      hintText: 'Ex: 077000001',
+                      prefixIcon: Icon(Icons.phone, size: 18),
+                    ),
+                    validator: _validatePhone,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info_outline,
+                            size: 18, color: Colors.blue),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Vous recevrez une demande de confirmation sur votre téléphone. Entrez votre code PIN pour valider.',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ] else ...[
+                  const SizedBox(height: 8),
+                ],
+
                 ElevatedButton(
                   onPressed: _isSubmitting ? null : _submit,
                   child: _isSubmitting
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
-                      : Text('Payer ${widget.amount} ${AppConstants.currencySymbol}'),
+                      : Text(
+                          'Payer ${widget.amount} ${AppConstants.currencySymbol}'),
                 ),
               ],
             ),
@@ -172,13 +275,15 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   }
 }
 
-class _OperatorOption extends StatelessWidget {
-  final MobileMoneyOperator operator;
+class _ChoiceOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
   final bool selected;
   final VoidCallback onTap;
 
-  const _OperatorOption({
-    required this.operator,
+  const _ChoiceOption({
+    required this.icon,
+    required this.label,
     required this.selected,
     required this.onTap,
   });
@@ -202,20 +307,18 @@ class _OperatorOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              operator == MobileMoneyOperator.airtel
-                  ? Icons.phone_android
-                  : Icons.smartphone,
-              color: selected ? AppTheme.primarySky : Colors.grey,
-            ),
+            Icon(icon, color: selected ? AppTheme.primarySky : Colors.grey),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                operator.label,
-                style: TextStyle(fontWeight: selected ? FontWeight.w600 : FontWeight.w400),
+                label,
+                style: TextStyle(
+                    fontWeight:
+                        selected ? FontWeight.w600 : FontWeight.w400),
               ),
             ),
-            if (selected) const Icon(Icons.check_circle, color: AppTheme.primarySky),
+            if (selected)
+              const Icon(Icons.check_circle, color: AppTheme.primarySky),
           ],
         ),
       ),

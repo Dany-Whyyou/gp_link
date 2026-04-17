@@ -112,11 +112,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 isDense: true,
                 isExpanded: true,
                 value: c.code,
+                // What's shown in the CLOSED state (must fit in 130px)
+                selectedItemBuilder: (_) => countries
+                    .map((item) => Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(item.shortLabel,
+                              overflow: TextOverflow.ellipsis),
+                        ))
+                    .toList(),
+                // What's shown in the OPEN dropdown list (full width)
                 items: countries
                     .map((item) => DropdownMenuItem(
                           value: item.code,
-                          child: Text(item.shortLabel,
-                              overflow: TextOverflow.ellipsis),
+                          child: Row(
+                            children: [
+                              Text(item.flagEmoji ?? '',
+                                  style: const TextStyle(fontSize: 18)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  item.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                item.dialCode ?? '',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
                         ))
                     .toList(),
                 onChanged: (v) {

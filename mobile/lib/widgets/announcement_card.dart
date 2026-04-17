@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/models/announcement.dart';
+import 'package:gp_link/models/country.dart';
+import 'package:gp_link/providers/country_provider.dart';
 
-class AnnouncementCard extends StatelessWidget {
+class AnnouncementCard extends ConsumerWidget {
   final Announcement announcement;
   final VoidCallback? onTap;
   final bool showTravelerInfo;
@@ -16,228 +18,345 @@ class AnnouncementCard extends StatelessWidget {
     this.showTravelerInfo = true,
   });
 
+  Country? _country(List<Country> countries, String name) {
+    for (final c in countries) {
+      if (c.name == name) return c;
+    }
+    return null;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('dd MMM yyyy', 'fr_FR');
-    final theme = Theme.of(context);
+    final countries = ref.watch(countriesProvider).valueOrNull ?? [];
+    final depCountry = _country(countries, announcement.departureCountry);
+    final arrCountry = _country(countries, announcement.arrivalCountry);
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Boosted badge
-            if (announcement.isBoosted)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppTheme.primarySky, AppTheme.accentOrange],
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.star, size: 14, color: Colors.white),
-                    SizedBox(width: 4),
-                    Text(
-                      'ANNONCE BOOSTEE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
+    final fillRatio = (announcement.availableKg == 0)
+        ? 0.0
+        : ((announcement.bookedKg ?? 0) / announcement.availableKg)
+            .clamp(0.0, 1.0);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: announcement.isBoosted
+                    ? AppTheme.accentOrange.withValues(alpha: 0.5)
+                    : const Color(0xFFE2E8F0),
+                width: announcement.isBoosted ? 1.5 : 1,
               ),
-
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Route
-                  Row(
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryNavy.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (announcement.isBoosted) _boostedStrip(),
+                _routeHero(depCountry, arrCountry),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.flight_takeoff,
-                          size: 18, color: AppTheme.gabonGreen),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          announcement.departureCity ?? announcement.departureCountry,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today,
+                              size: 14, color: Colors.grey),
+                          const SizedBox(width: 6),
+                          Text(
+                            dateFormat.format(announcement.departureDate),
+                            style: TextStyle(
+                                fontSize: 13, color: Colors.grey.shade700),
                           ),
-                        ),
-                      ),
-                      const Icon(Icons.arrow_forward,
-                          size: 16, color: AppTheme.primarySky),
-                      const SizedBox(width: 6),
-                      const Icon(Icons.flight_land,
-                          size: 18, color: AppTheme.primarySky),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          announcement.arrivalCity ?? announcement.arrivalCountry,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Date
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today,
-                          size: 14,
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.5)),
-                      const SizedBox(width: 6),
-                      Text(
-                        dateFormat.format(announcement.departureDate),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                      if (announcement.airline != null) ...[
-                        const SizedBox(width: 16),
-                        Icon(Icons.airlines,
-                            size: 14,
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.5)),
-                        const SizedBox(width: 4),
-                        Text(
-                          announcement.airline!,
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ],
-                    ],
-                  ),
-
-                  const Divider(height: 20),
-
-                  // KG and Price
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _InfoChip(
-                        icon: Icons.inventory_2_outlined,
-                        label:
-                            '${announcement.remainingKg.toStringAsFixed(1)} kg dispo',
-                        color: announcement.hasSpace
-                            ? AppTheme.gabonGreen
-                            : AppTheme.error,
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primarySky.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${announcement.pricePerKg.toStringAsFixed(0)} ${AppConstants.currencySymbol}/kg',
-                          style: const TextStyle(
-                            color: AppTheme.primaryNavy,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Traveler info
-                  if (showTravelerInfo && announcement.traveler != null) ...[
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 14,
-                          backgroundColor:
-                              AppTheme.primarySky.withValues(alpha: 0.2),
-                          child: Text(
-                            announcement.traveler!.initials,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryNavy,
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primarySky.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${announcement.pricePerKg.toStringAsFixed(0)} FCFA/kg',
+                              style: const TextStyle(
+                                color: AppTheme.primaryNavy,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          announcement.traveler!.fullName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (announcement.traveler!.isVerified) ...[
-                          const SizedBox(width: 4),
-                          const Icon(Icons.verified,
-                              size: 14, color: AppTheme.primarySky),
                         ],
-                        const Spacer(),
-                        if (announcement.traveler!.rating > 0)
-                          Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  size: 14, color: AppTheme.accentOrange),
-                              const SizedBox(width: 2),
-                              Text(
-                                announcement.traveler!.rating
-                                    .toStringAsFixed(1),
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
+                      ),
+                      const SizedBox(height: 12),
+                      _kgBar(fillRatio),
+                      if (showTravelerInfo &&
+                          announcement.traveler != null) ...[
+                        const SizedBox(height: 12),
+                        _travelerRow(context),
                       ],
-                    ),
-                  ],
-                ],
-              ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
-}
 
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
+  Widget _boostedStrip() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.accentOrange, AppTheme.accentOrangeDark],
+        ),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.rocket_launch, size: 13, color: Colors.white),
+          SizedBox(width: 5),
+          Text(
+            'ANNONCE BOOSTÉE',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
+  Widget _routeHero(Country? dep, Country? arr) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primarySky.withValues(alpha: 0.06),
+            AppTheme.primaryNavy.withValues(alpha: 0.03),
+          ],
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _endpoint(
+              flag: dep?.flagEmoji ?? '🌍',
+              country: announcement.departureCountry,
+              city: announcement.departureCity,
+              alignStart: true,
+            ),
+          ),
+          SizedBox(
+            width: 80,
+            child: CustomPaint(
+              size: const Size(80, 32),
+              painter: _PathPainter(),
+              child: const Center(
+                child: Icon(Icons.flight,
+                    color: AppTheme.primarySky, size: 22),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _endpoint(
+              flag: arr?.flagEmoji ?? '🌍',
+              country: announcement.arrivalCountry,
+              city: announcement.arrivalCity,
+              alignStart: false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+  Widget _endpoint({
+    required String flag,
+    required String country,
+    required String? city,
+    required bool alignStart,
+  }) {
+    final cross =
+        alignStart ? CrossAxisAlignment.start : CrossAxisAlignment.end;
+    return Column(
+      crossAxisAlignment: cross,
       children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 4),
+        Text(flag, style: const TextStyle(fontSize: 26)),
+        const SizedBox(height: 4),
         Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+          country,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+            color: AppTheme.primaryNavy,
+          ),
+          textAlign: alignStart ? TextAlign.start : TextAlign.end,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (city != null && city.isNotEmpty)
+          Text(
+            city,
+            style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            textAlign: alignStart ? TextAlign.start : TextAlign.end,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+      ],
+    );
+  }
+
+  Widget _kgBar(double fillRatio) {
+    final remaining = announcement.remainingKg;
+    final total = announcement.availableKg;
+    final isFull = remaining <= 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.inventory_2_outlined,
+                size: 14,
+                color: isFull ? AppTheme.error : AppTheme.gabonGreen),
+            const SizedBox(width: 5),
+            Text(
+              isFull
+                  ? 'Complet'
+                  : '${remaining.toStringAsFixed(0)} kg sur ${total.toStringAsFixed(0)} disponibles',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isFull ? AppTheme.error : AppTheme.gabonGreen,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: fillRatio,
+            minHeight: 6,
+            backgroundColor: AppTheme.gabonGreen.withValues(alpha: 0.15),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              isFull ? AppTheme.error : AppTheme.accentOrange,
+            ),
           ),
         ),
       ],
     );
   }
+
+  Widget _travelerRow(BuildContext context) {
+    final t = announcement.traveler!;
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 14,
+          backgroundColor: AppTheme.primarySky.withValues(alpha: 0.15),
+          backgroundImage:
+              t.avatarUrl != null ? NetworkImage(t.avatarUrl!) : null,
+          child: t.avatarUrl == null
+              ? Text(
+                  t.initials,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryNavy,
+                  ),
+                )
+              : null,
+        ),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            t.fullName,
+            style: const TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w500),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (t.isVerified) ...[
+          const SizedBox(width: 4),
+          const Icon(Icons.verified, size: 14, color: AppTheme.primarySky),
+        ],
+        const Spacer(),
+        if (t.rating > 0)
+          Row(
+            children: [
+              const Icon(Icons.star, size: 13, color: AppTheme.accentOrange),
+              const SizedBox(width: 2),
+              Text(
+                t.rating.toStringAsFixed(1),
+                style: const TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              if (t.ratingCount > 0)
+                Text(
+                  ' (${t.ratingCount})',
+                  style:
+                      TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _PathPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppTheme.primarySky.withValues(alpha: 0.5)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final dashWidth = 4.0;
+    final dashSpace = 3.0;
+    final midY = size.height / 2;
+    double startX = 0;
+    while (startX < size.width) {
+      canvas.drawLine(
+        Offset(startX, midY),
+        Offset(startX + dashWidth, midY),
+        paint,
+      );
+      startX += dashWidth + dashSpace;
+    }
+
+    final dotPaint = Paint()
+      ..color = AppTheme.accentOrange
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(0, midY), 3, dotPaint);
+    canvas.drawCircle(Offset(size.width, midY), 3, dotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

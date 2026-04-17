@@ -69,7 +69,7 @@ class AnnouncementCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          announcement.departureCity,
+                          announcement.departureCity ?? announcement.departureCountry,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -83,7 +83,7 @@ class AnnouncementCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          announcement.arrivalCity,
+                          announcement.arrivalCity ?? announcement.arrivalCountry,
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),

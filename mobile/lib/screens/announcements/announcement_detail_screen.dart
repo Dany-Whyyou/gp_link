@@ -186,7 +186,8 @@ class _AnnouncementDetailScreenState
                                     color: Colors.white, size: 28),
                                 const SizedBox(height: 6),
                                 Text(
-                                  announcement.departureCity,
+                                  announcement.departureCity ??
+                                      announcement.departureCountry,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -194,11 +195,12 @@ class _AnnouncementDetailScreenState
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                Text(
-                                  announcement.departureCountry,
-                                  style: const TextStyle(
-                                      color: Colors.white70, fontSize: 13),
-                                ),
+                                if (announcement.departureCity != null)
+                                  Text(
+                                    announcement.departureCountry,
+                                    style: const TextStyle(
+                                        color: Colors.white70, fontSize: 13),
+                                  ),
                               ],
                             ),
                           ),
@@ -211,7 +213,8 @@ class _AnnouncementDetailScreenState
                                     color: Colors.white, size: 28),
                                 const SizedBox(height: 6),
                                 Text(
-                                  announcement.arrivalCity,
+                                  announcement.arrivalCity ??
+                                      announcement.arrivalCountry,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -219,9 +222,10 @@ class _AnnouncementDetailScreenState
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                Text(
-                                  announcement.arrivalCountry,
-                                  style: const TextStyle(
+                                if (announcement.arrivalCity != null)
+                                  Text(
+                                    announcement.arrivalCountry,
+                                    style: const TextStyle(
                                       color: Colors.white70, fontSize: 13),
                                 ),
                               ],

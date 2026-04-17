@@ -24,8 +24,8 @@ class AlertOperationsNotifier extends StateNotifier<AsyncValue<void>> {
       : super(const AsyncData(null));
 
   Future<Alert?> createAlert({
-    String? departureCity,
-    String? arrivalCity,
+    String? departureCountry,
+    String? arrivalCountry,
     DateTime? departureDateMin,
     DateTime? departureDateMax,
     double? maxPricePerKg,
@@ -34,8 +34,8 @@ class AlertOperationsNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncLoading();
     try {
       final alert = await _service.create(
-        departureCity: departureCity,
-        arrivalCity: arrivalCity,
+        departureCountry: departureCountry,
+        arrivalCountry: arrivalCountry,
         departureDateMin: departureDateMin,
         departureDateMax: departureDateMax,
         maxPricePerKg: maxPricePerKg,

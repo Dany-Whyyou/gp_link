@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/alert_provider.dart';
-import 'package:gp_link/widgets/city_autocomplete.dart';
+import 'package:gp_link/widgets/country_picker.dart';
 import 'package:gp_link/widgets/loading_widget.dart';
 
 class CreateAlertScreen extends ConsumerStatefulWidget {
@@ -17,8 +15,8 @@ class CreateAlertScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
-  String? _departureCity;
-  String? _arrivalCity;
+  String? _departureCountry;
+  String? _arrivalCountry;
   DateTime? _departureDateMin;
   DateTime? _departureDateMax;
   final _maxPriceController = TextEditingController();
@@ -61,8 +59,8 @@ class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
   }
 
   Future<void> _submit() async {
-    if (_departureCity == null &&
-        _arrivalCity == null &&
+    if (_departureCountry == null &&
+        _arrivalCountry == null &&
         _departureDateMin == null &&
         _maxPriceController.text.isEmpty &&
         _minKgController.text.isEmpty) {
@@ -83,10 +81,8 @@ class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
           : null;
 
       await ref.read(alertOperationsProvider.notifier).createAlert(
-            departureCity:
-                _departureCity?.isNotEmpty == true ? _departureCity : null,
-            arrivalCity:
-                _arrivalCity?.isNotEmpty == true ? _arrivalCity : null,
+            departureCountry: _departureCountry,
+            arrivalCountry: _arrivalCountry,
             departureDateMin: _departureDateMin,
             departureDateMax: _departureDateMax,
             maxPricePerKg: maxPrice,
@@ -141,17 +137,17 @@ class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Cities
-              CityAutocomplete(
-                label: 'Ville de départ (optionnel)',
-                hintText: 'Ex: Libreville',
-                onSelected: (v) => _departureCity = v,
+              // Countries
+              CountryPicker(
+                label: 'Pays de départ (optionnel)',
+                value: _departureCountry,
+                onSelected: (c) => setState(() => _departureCountry = c.name),
               ),
               const SizedBox(height: 16),
-              CityAutocomplete(
-                label: 'Ville d\'arrivée (optionnel)',
-                hintText: 'Ex: Paris',
-                onSelected: (v) => _arrivalCity = v,
+              CountryPicker(
+                label: 'Pays d\'arrivée (optionnel)',
+                value: _arrivalCountry,
+                onSelected: (c) => setState(() => _arrivalCountry = c.name),
               ),
               const SizedBox(height: 16),
 
@@ -211,20 +207,17 @@ class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Price and KG
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _maxPriceController,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      decoration: InputDecoration(
-                        labelText: 'Prix max/kg',
-                        suffixText: AppConstants.currencySymbol,
-                        prefixIcon: const Icon(Icons.attach_money, size: 18),
+                      decoration: const InputDecoration(
+                        labelText: 'Prix max / kg',
+                        hintText: 'Ex: 5000',
+                        suffixText: 'FCFA',
+                        prefixIcon: Icon(Icons.attach_money, size: 18),
                       ),
                     ),
                   ),
@@ -232,10 +225,10 @@ class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _minKgController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                      keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Kilos min',
+                        labelText: 'Kg min',
+                        hintText: 'Ex: 5',
                         suffixText: 'kg',
                         prefixIcon: Icon(Icons.inventory_2, size: 18),
                       ),
@@ -244,31 +237,9 @@ class _CreateAlertScreenState extends ConsumerState<CreateAlertScreen> {
                 ],
               ),
               const SizedBox(height: 32),
-
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
                 child: const Text('Créer l\'alerte'),
-              ),
-
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.info.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline, color: AppTheme.info, size: 18),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Les alertes sont gratuites et illimitées. Vous recevrez une notification push à chaque correspondance.',
-                        style: TextStyle(fontSize: 12, color: AppTheme.info),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),

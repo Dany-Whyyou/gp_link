@@ -28,8 +28,8 @@ class AlertService {
 
   /// Create a new alert.
   Future<Alert> create({
-    String? departureCity,
-    String? arrivalCity,
+    String? departureCountry,
+    String? arrivalCountry,
     DateTime? departureDateMin,
     DateTime? departureDateMax,
     double? maxPricePerKg,
@@ -39,10 +39,10 @@ class AlertService {
 
     final data = {
       'user_id': userId,
-      'departure_city': departureCity,
-      'arrival_city': arrivalCity,
-      'departure_date_min': departureDateMin?.toIso8601String(),
-      'departure_date_max': departureDateMax?.toIso8601String(),
+      'departure_country': departureCountry,
+      'arrival_country': arrivalCountry,
+      'date_from': departureDateMin?.toIso8601String(),
+      'date_to': departureDateMax?.toIso8601String(),
       'max_price_per_kg': maxPricePerKg,
       'min_kg': minKg,
       'status': AlertStatus.active.name,

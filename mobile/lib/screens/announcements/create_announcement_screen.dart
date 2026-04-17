@@ -9,7 +9,7 @@ import 'package:gp_link/providers/announcement_provider.dart';
 import 'package:gp_link/providers/auth_provider.dart';
 import 'package:gp_link/providers/app_config_provider.dart';
 import 'package:gp_link/services/app_config_service.dart';
-import 'package:gp_link/widgets/city_autocomplete.dart';
+import 'package:gp_link/widgets/country_picker.dart';
 import 'package:gp_link/widgets/loading_widget.dart';
 
 class CreateAnnouncementScreen extends ConsumerStatefulWidget {
@@ -29,10 +29,8 @@ class _CreateAnnouncementScreenState
   final _flightNumberController = TextEditingController();
   final _airlineController = TextEditingController();
 
-  String _departureCity = '';
   String _departureCountry = 'Gabon';
-  String _arrivalCity = '';
-  String _arrivalCountry = '';
+  String _arrivalCountry = 'France';
   DateTime? _departureDate;
   DateTime? _arrivalDate;
   AnnouncementType _type = AnnouncementType.standard;
@@ -95,9 +93,9 @@ class _CreateAnnouncementScreenState
       );
       return;
     }
-    if (_departureCity.isEmpty || _arrivalCity.isEmpty) {
+    if (_departureCountry == _arrivalCountry) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir les villes de départ et d\'arrivée')),
+        const SnackBar(content: Text('Le pays de départ et d\'arrivée doivent être différents')),
       );
       return;
     }
@@ -121,9 +119,7 @@ class _CreateAnnouncementScreenState
     try {
       final service = ref.read(announcementServiceProvider);
       final announcement = await service.create(
-        departureCity: _departureCity,
         departureCountry: _departureCountry,
-        arrivalCity: _arrivalCity,
         arrivalCountry: _arrivalCountry,
         departureDate: _departureDate!,
         arrivalDate: _arrivalDate,
@@ -225,17 +221,17 @@ class _CreateAnnouncementScreenState
                 ),
                 const SizedBox(height: 24),
 
-                // Cities
-                CityAutocomplete(
-                  label: 'Ville de départ',
-                  hintText: 'Ex: Libreville',
-                  onSelected: (v) => _departureCity = v,
+                // Countries
+                CountryPicker(
+                  label: 'Pays de départ',
+                  value: _departureCountry,
+                  onSelected: (c) => setState(() => _departureCountry = c.name),
                 ),
                 const SizedBox(height: 16),
-                CityAutocomplete(
-                  label: 'Ville d\'arrivée',
-                  hintText: 'Ex: Paris',
-                  onSelected: (v) => _arrivalCity = v,
+                CountryPicker(
+                  label: 'Pays d\'arrivée',
+                  value: _arrivalCountry,
+                  onSelected: (c) => setState(() => _arrivalCountry = c.name),
                 ),
                 const SizedBox(height: 16),
 

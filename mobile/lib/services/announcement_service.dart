@@ -87,9 +87,9 @@ class AnnouncementService {
 
   /// Create a new announcement (status = pending_payment).
   Future<Announcement> create({
-    required String departureCity,
+    String? departureCity,
     required String departureCountry,
-    required String arrivalCity,
+    String? arrivalCity,
     required String arrivalCountry,
     required DateTime departureDate,
     DateTime? arrivalDate,

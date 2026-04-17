@@ -29,7 +29,10 @@ class MyAnnouncementsScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               itemCount: list.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, i) => _AnnCard(ann: list[i]),
+              itemBuilder: (_, i) => _AnnCard(
+                ann: list[i],
+                onAction: () => ref.invalidate(myAnnouncementsProvider),
+              ),
             ),
           );
         },

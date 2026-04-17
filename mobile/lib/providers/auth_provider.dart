@@ -127,6 +127,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required UserRole role,
     String? city,
     String? country,
+    bool acceptedTerms = false,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -135,6 +136,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         role: role,
         city: city,
         country: country,
+        acceptedTerms: acceptedTerms,
       );
       state = AuthState(
         status: AuthStatus.authenticated,

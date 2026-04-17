@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/auth_provider.dart';
+import 'package:gp_link/screens/legal/terms_acceptance_widget.dart';
 import 'package:gp_link/widgets/loading_widget.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _cityController = TextEditingController();
   UserRole _selectedRole = UserRole.client;
+  bool _termsAccepted = false;
 
   @override
   void dispose() {
@@ -29,6 +31,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (!_termsAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Vous devez accepter les CGU pour créer votre compte'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
+
     final success = await ref.read(authProvider.notifier).createProfile(
           fullName: _nameController.text.trim(),
           role: _selectedRole,
@@ -36,6 +49,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ? _cityController.text.trim()
               : null,
           country: 'Gabon',
+          acceptedTerms: true,
         );
 
     if (success && mounted) {
@@ -138,7 +152,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       setState(() => _selectedRole = UserRole.voyageur),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+
+                TermsAcceptanceWidget(
+                  accepted: _termsAccepted,
+                  onChanged: (v) => setState(() => _termsAccepted = v),
+                ),
+
+                const SizedBox(height: 24),
 
                 ElevatedButton(
                   onPressed: _submit,

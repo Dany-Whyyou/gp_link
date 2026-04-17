@@ -26,6 +26,7 @@ class AuthService {
     required UserRole role,
     String? city,
     String? country,
+    bool acceptedTerms = false,
   }) async {
     final userId = SupabaseService.currentUserId!;
     final phone = _auth.currentUser?.phone;
@@ -40,6 +41,8 @@ class AuthService {
       'country': country ?? 'Gabon',
       'created_at': now,
       'updated_at': now,
+      if (acceptedTerms) 'terms_accepted_at': now,
+      if (acceptedTerms) 'terms_version': AppConstants.termsVersion,
     };
 
     final result = await SupabaseService.from(AppConstants.profilesTable)

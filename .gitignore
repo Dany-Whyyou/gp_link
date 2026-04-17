@@ -1,0 +1,82 @@
+# --------------------------
+# Secrets - NEVER commit
+# --------------------------
+.env
+.env.local
+.env.*.local
+supabase/.env
+!**/.env.example
+!**/.env.local.example
+
+# --------------------------
+# Node / Next.js (admin)
+# --------------------------
+node_modules/
+.next/
+out/
+.vercel/
+.wrangler/
+*.tsbuildinfo
+next-env.d.ts
+
+# --------------------------
+# Flutter / Dart (mobile)
+# --------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+.idea/
+.vscode/
+pubspec.lock
+!mobile/pubspec.lock
+
+# --------------------------
+# iOS
+# --------------------------
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/flutter_export_environment.sh
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/App.framework
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Runner.xcworkspace/xcuserdata/
+mobile/ios/Runner.xcodeproj/xcuserdata/
+mobile/ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+mobile/ios/**/*.xcuserstate
+mobile/ios/**/xcuserdata/
+
+# --------------------------
+# Android
+# --------------------------
+mobile/android/.gradle/
+mobile/android/captures/
+mobile/android/gradlew
+mobile/android/gradlew.bat
+mobile/android/local.properties
+mobile/android/**/GeneratedPluginRegistrant.java
+mobile/android/key.properties
+mobile/android/app/key.jks
+*.keystore
+
+# --------------------------
+# Supabase CLI
+# --------------------------
+supabase/.branches
+supabase/.temp
+supabase/logs/
+
+# --------------------------
+# macOS / Editors
+# --------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.claude/

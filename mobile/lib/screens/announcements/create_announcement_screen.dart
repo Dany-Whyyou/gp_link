@@ -1,0 +1,651 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:gp_link/config/constants.dart';
+import 'package:gp_link/config/theme.dart';
+import 'package:gp_link/providers/announcement_provider.dart';
+import 'package:gp_link/providers/auth_provider.dart';
+import 'package:gp_link/providers/app_config_provider.dart';
+import 'package:gp_link/services/app_config_service.dart';
+import 'package:gp_link/widgets/city_autocomplete.dart';
+import 'package:gp_link/widgets/loading_widget.dart';
+
+class CreateAnnouncementScreen extends ConsumerStatefulWidget {
+  const CreateAnnouncementScreen({super.key});
+
+  @override
+  ConsumerState<CreateAnnouncementScreen> createState() =>
+      _CreateAnnouncementScreenState();
+}
+
+class _CreateAnnouncementScreenState
+    extends ConsumerState<CreateAnnouncementScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _kgController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _flightNumberController = TextEditingController();
+  final _airlineController = TextEditingController();
+
+  String _departureCity = '';
+  String _departureCountry = 'Gabon';
+  String _arrivalCity = '';
+  String _arrivalCountry = '';
+  DateTime? _departureDate;
+  DateTime? _arrivalDate;
+  AnnouncementType _type = AnnouncementType.standard;
+  bool _collectAtAirport = true;
+  bool _deliverToAddress = false;
+  bool _isSubmitting = false;
+
+  final _acceptedItems = <String>[];
+  final _rejectedItems = <String>[];
+  final _itemController = TextEditingController();
+
+  @override
+  void dispose() {
+    _kgController.dispose();
+    _priceController.dispose();
+    _descriptionController.dispose();
+    _flightNumberController.dispose();
+    _airlineController.dispose();
+    _itemController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate(bool isDeparture) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: isDeparture
+          ? (_departureDate ?? now.add(const Duration(days: 1)))
+          : (_arrivalDate ?? _departureDate ?? now.add(const Duration(days: 2))),
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+      locale: const Locale('fr', 'FR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context)
+                .colorScheme
+                .copyWith(primary: AppTheme.primaryGold),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        if (isDeparture) {
+          _departureDate = picked;
+        } else {
+          _arrivalDate = picked;
+        }
+      });
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_departureDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner une date de départ')),
+      );
+      return;
+    }
+    if (_departureCity.isEmpty || _arrivalCity.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez remplir les villes de départ et d\'arrivée')),
+      );
+      return;
+    }
+
+    // Check for existing active announcement
+    final hasActive = await ref.read(hasActiveAnnouncementProvider.future);
+    if (hasActive) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Vous avez déjà une annonce active. Limite: ${AppConstants.maxActiveAnnouncements} annonce(s).'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final service = ref.read(announcementServiceProvider);
+      final announcement = await service.create(
+        departureCity: _departureCity,
+        departureCountry: _departureCountry,
+        arrivalCity: _arrivalCity,
+        arrivalCountry: _arrivalCountry,
+        departureDate: _departureDate!,
+        arrivalDate: _arrivalDate,
+        availableKg: double.parse(_kgController.text),
+        pricePerKg: double.parse(_priceController.text),
+        type: _type,
+        description: _descriptionController.text.trim().isNotEmpty
+            ? _descriptionController.text.trim()
+            : null,
+        flightNumber: _flightNumberController.text.trim().isNotEmpty
+            ? _flightNumberController.text.trim()
+            : null,
+        airline: _airlineController.text.trim().isNotEmpty
+            ? _airlineController.text.trim()
+            : null,
+        acceptedItems: _acceptedItems,
+        rejectedItems: _rejectedItems,
+        collectAtAirport: _collectAtAirport,
+        deliverToAddress: _deliverToAddress,
+      );
+
+      ref.invalidate(announcementsProvider);
+      ref.invalidate(myAnnouncementsProvider);
+
+      final pricing =
+          ref.read(pricingProvider).value ?? Pricing.defaults();
+      final amount = pricing.priceFor(_type);
+
+      if (mounted) {
+        context.pushReplacement('/payments/new', extra: {
+          'announcement_id': announcement.id,
+          'payment_type': 'announcement',
+          'amount': amount,
+          'label': 'Publication ${_type.label}',
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: $e'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('dd/MM/yyyy');
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Nouvelle annonce')),
+      body: LoadingOverlay(
+        isLoading: _isSubmitting,
+        message: 'Publication en cours...',
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Type selection
+                Text('Type d\'annonce',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _TypeChip(
+                        label: 'Standard',
+                        price:
+                            '${ref.watch(pricingProvider).value?.standardAnnouncement ?? AppConstants.defaultPriceStandard} ${AppConstants.currencySymbol}',
+                        isSelected: _type == AnnouncementType.standard,
+                        onTap: () =>
+                            setState(() => _type = AnnouncementType.standard),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _TypeChip(
+                        label: 'Boosté',
+                        price:
+                            '${ref.watch(pricingProvider).value?.boostedAnnouncement ?? AppConstants.defaultPriceBoosted} ${AppConstants.currencySymbol}',
+                        isSelected: _type == AnnouncementType.boosted,
+                        isBoosted: true,
+                        onTap: () =>
+                            setState(() => _type = AnnouncementType.boosted),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Cities
+                CityAutocomplete(
+                  label: 'Ville de départ',
+                  hintText: 'Ex: Libreville',
+                  onSelected: (v) => _departureCity = v,
+                ),
+                const SizedBox(height: 16),
+                CityAutocomplete(
+                  label: 'Ville d\'arrivée',
+                  hintText: 'Ex: Paris',
+                  onSelected: (v) => _arrivalCity = v,
+                ),
+                const SizedBox(height: 16),
+
+                // Dates
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _pickDate(true),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Date de départ *',
+                            prefixIcon: Icon(Icons.calendar_today, size: 18),
+                          ),
+                          child: Text(
+                            _departureDate != null
+                                ? dateFormat.format(_departureDate!)
+                                : 'Sélectionner',
+                            style: TextStyle(
+                              color: _departureDate != null
+                                  ? null
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _pickDate(false),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Date d\'arrivée',
+                            prefixIcon: Icon(Icons.calendar_today, size: 18),
+                          ),
+                          child: Text(
+                            _arrivalDate != null
+                                ? dateFormat.format(_arrivalDate!)
+                                : 'Optionnel',
+                            style: TextStyle(
+                              color: _arrivalDate != null
+                                  ? null
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // KG and price
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _kgController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,1}')),
+                        ],
+                        decoration: const InputDecoration(
+                          labelText: 'Kilos disponibles *',
+                          suffixText: 'kg',
+                          prefixIcon: Icon(Icons.inventory_2, size: 18),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Requis';
+                          final kg = double.tryParse(v);
+                          if (kg == null || kg < AppConstants.minKgPerAnnouncement) {
+                            return 'Min ${AppConstants.minKgPerAnnouncement} kg';
+                          }
+                          if (kg > AppConstants.maxKgPerAnnouncement) {
+                            return 'Max ${AppConstants.maxKgPerAnnouncement} kg';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _priceController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: InputDecoration(
+                          labelText: 'Prix par kg *',
+                          suffixText: AppConstants.currencySymbol,
+                          prefixIcon: const Icon(Icons.attach_money, size: 18),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Requis';
+                          final price = int.tryParse(v);
+                          if (price == null || price <= 0) {
+                            return 'Prix invalide';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Flight info
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _airlineController,
+                        decoration: const InputDecoration(
+                          labelText: 'Compagnie',
+                          hintText: 'Ex: Air France',
+                          prefixIcon: Icon(Icons.airlines, size: 18),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _flightNumberController,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: const InputDecoration(
+                          labelText: 'N° de vol',
+                          hintText: 'Ex: AF990',
+                          prefixIcon:
+                              Icon(Icons.confirmation_number, size: 18),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Description
+                TextFormField(
+                  controller: _descriptionController,
+                  maxLines: 3,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (optionnel)',
+                    hintText: 'Informations complémentaires...',
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Collection options
+                Text('Options de remise',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                CheckboxListTile(
+                  value: _collectAtAirport,
+                  onChanged: (v) =>
+                      setState(() => _collectAtAirport = v ?? true),
+                  title: const Text('Récupération à l\'aéroport'),
+                  activeColor: AppTheme.primaryGold,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                CheckboxListTile(
+                  value: _deliverToAddress,
+                  onChanged: (v) =>
+                      setState(() => _deliverToAddress = v ?? false),
+                  title: const Text('Livraison à domicile'),
+                  activeColor: AppTheme.primaryGold,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Accepted items
+                _ItemsSection(
+                  title: 'Objets acceptés',
+                  items: _acceptedItems,
+                  color: AppTheme.success,
+                  onAdd: (item) =>
+                      setState(() => _acceptedItems.add(item)),
+                  onRemove: (i) =>
+                      setState(() => _acceptedItems.removeAt(i)),
+                ),
+                const SizedBox(height: 12),
+
+                // Rejected items
+                _ItemsSection(
+                  title: 'Objets refusés',
+                  items: _rejectedItems,
+                  color: AppTheme.error,
+                  onAdd: (item) =>
+                      setState(() => _rejectedItems.add(item)),
+                  onRemove: (i) =>
+                      setState(() => _rejectedItems.removeAt(i)),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Price summary
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryGold.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: AppTheme.primaryGold.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Frais de publication'),
+                          Text(
+                            '${(ref.watch(pricingProvider).value ?? Pricing.defaults()).priceFor(_type)} ${AppConstants.currencySymbol}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: AppTheme.primaryDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_type == AnnouncementType.boosted)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4),
+                          child: Text(
+                            'Votre annonce sera mise en avant pendant 7 jours',
+                            style: TextStyle(fontSize: 12, color: AppTheme.primaryGold),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                Consumer(
+                  builder: (context, ref, _) {
+                    final pricing =
+                        ref.watch(pricingProvider).value ?? Pricing.defaults();
+                    return ElevatedButton(
+                      onPressed: _isSubmitting ? null : _submit,
+                      child: Text(
+                          'Publier (${pricing.priceFor(_type)} ${AppConstants.currencySymbol})'),
+                    );
+                  },
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeChip extends StatelessWidget {
+  final String label;
+  final String price;
+  final bool isSelected;
+  final bool isBoosted;
+  final VoidCallback onTap;
+
+  const _TypeChip({
+    required this.label,
+    required this.price,
+    required this.isSelected,
+    this.isBoosted = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isBoosted
+                  ? AppTheme.primaryAmber.withValues(alpha: 0.15)
+                  : AppTheme.primaryGold.withValues(alpha: 0.1))
+              : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? (isBoosted ? AppTheme.primaryAmber : AppTheme.primaryGold)
+                : const Color(0xFFE0E0E0),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            if (isBoosted)
+              const Icon(Icons.star, color: AppTheme.primaryAmber, size: 20),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(price,
+                style: const TextStyle(fontSize: 12, color: AppTheme.primaryDark)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ItemsSection extends StatefulWidget {
+  final String title;
+  final List<String> items;
+  final Color color;
+  final ValueChanged<String> onAdd;
+  final ValueChanged<int> onRemove;
+
+  const _ItemsSection({
+    required this.title,
+    required this.items,
+    required this.color,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  @override
+  State<_ItemsSection> createState() => _ItemsSectionState();
+}
+
+class _ItemsSectionState extends State<_ItemsSection> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(widget.title,
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: 'Ajouter un objet...',
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onSubmitted: (v) {
+                  if (v.trim().isNotEmpty) {
+                    widget.onAdd(v.trim());
+                    _controller.clear();
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: Icon(Icons.add_circle, color: widget.color),
+              onPressed: () {
+                if (_controller.text.trim().isNotEmpty) {
+                  widget.onAdd(_controller.text.trim());
+                  _controller.clear();
+                }
+              },
+            ),
+          ],
+        ),
+        if (widget.items.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: widget.items.asMap().entries.map((entry) {
+              return Chip(
+                label: Text(entry.value, style: const TextStyle(fontSize: 12)),
+                deleteIcon: const Icon(Icons.close, size: 14),
+                onDeleted: () => widget.onRemove(entry.key),
+                backgroundColor: widget.color.withValues(alpha: 0.1),
+              );
+            }).toList(),
+          ),
+        ],
+      ],
+    );
+  }
+}

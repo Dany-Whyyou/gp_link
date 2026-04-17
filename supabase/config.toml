@@ -1,0 +1,11 @@
+# Supabase local development config
+project_id = "gp-link"
+
+[functions.mypvit-secret]
+verify_jwt = false
+
+[functions.mypvit-webhook]
+verify_jwt = false
+
+[functions.mypvit-initiate]
+verify_jwt = true

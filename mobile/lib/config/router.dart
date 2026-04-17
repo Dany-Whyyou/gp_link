@@ -15,6 +15,10 @@ import 'package:gp_link/screens/profile/edit_profile_screen.dart';
 import 'package:gp_link/screens/notifications/notifications_screen.dart';
 import 'package:gp_link/screens/payments/payment_screen.dart';
 import 'package:gp_link/screens/payments/payment_polling_screen.dart';
+import 'package:gp_link/screens/profile/my_announcements_screen.dart';
+import 'package:gp_link/screens/profile/my_bookings_screen.dart';
+import 'package:gp_link/screens/profile/my_payments_screen.dart';
+import 'package:gp_link/screens/chat/conversations_list_screen.dart';
 
 /// Notifier qui déclenche un refresh du router quand authProvider change,
 /// SANS recréer le GoRouter (qui perdrait le state des écrans).
@@ -124,6 +128,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => PaymentPollingScreen(
           paymentId: state.pathParameters['id']!,
         ),
+      ),
+      GoRoute(
+        path: '/my/announcements',
+        builder: (context, state) => const MyAnnouncementsScreen(),
+      ),
+      GoRoute(
+        path: '/my/bookings',
+        builder: (context, state) => const MyBookingsScreen(),
+      ),
+      GoRoute(
+        path: '/my/payments',
+        builder: (context, state) => const MyPaymentsScreen(),
+      ),
+      GoRoute(
+        path: '/messages',
+        builder: (context, state) => const ConversationsListScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

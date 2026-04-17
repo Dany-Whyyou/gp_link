@@ -8,7 +8,7 @@ import 'package:gp_link/providers/free_offer_provider.dart';
 import 'package:gp_link/providers/notification_provider.dart';
 import 'package:gp_link/screens/announcements/announcements_list_screen.dart';
 import 'package:gp_link/screens/alerts/alerts_list_screen.dart';
-import 'package:gp_link/screens/chat/conversations_list_screen.dart';
+import 'package:gp_link/screens/profile/my_announcements_screen.dart';
 import 'package:gp_link/screens/profile/profile_screen.dart';
 import 'package:gp_link/services/tutorial_service.dart';
 import 'package:gp_link/widgets/home_tutorial.dart';
@@ -26,7 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _screens = const [
     AnnouncementsListScreen(),
     AlertsListScreen(),
-    ConversationsListScreen(),
+    MyAnnouncementsScreen(),
     ProfileScreen(),
   ];
 
@@ -63,7 +63,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final unreadChat = ref.watch(unreadChatCountProvider);
+    // ignore: unused_local_variable
     final unreadNotif = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
@@ -86,16 +88,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label: 'Alertes',
           ),
           BottomNavigationBarItem(
-            icon: _BadgeIcon(
-              icon: Icons.chat_bubble_outline,
-              count: unreadChat.valueOrNull ?? 0,
-              iconKey: _keyMessages,
-            ),
-            activeIcon: _BadgeIcon(
-              icon: Icons.chat_bubble,
-              count: unreadChat.valueOrNull ?? 0,
-            ),
-            label: 'Messages',
+            icon: Icon(Icons.inventory_2_outlined, key: _keyMessages),
+            activeIcon: const Icon(Icons.inventory_2),
+            label: 'Mes annonces',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline, key: _keyProfile),

@@ -74,11 +74,11 @@ class HomeTutorial {
         shape: ShapeLightFocus.RRect,
       ),
       _target(
-        id: 'messages',
+        id: 'mine',
         key: targets.messagesTab,
-        title: 'Chattez en toute sécurité',
+        title: 'Mes annonces',
         description:
-            'Contactez directement les voyageurs via la messagerie intégrée pour organiser le transport.',
+            'Retrouvez vos trajets publiés, leur statut, et gérez-les depuis cet onglet.',
         shape: ShapeLightFocus.RRect,
       ),
       _target(

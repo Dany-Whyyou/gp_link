@@ -9,7 +9,11 @@ const DEFAULT_CONFIGS = [
   { key: "price_boosted", value: "3000", description: "Prix annonce boostee (FCFA)" },
   { key: "price_extension", value: "1000", description: "Prix extension d'annonce (FCFA)" },
   { key: "price_extra_announcement", value: "2000", description: "Prix annonce supplementaire (FCFA)" },
-  { key: "free_first_announcement", value: "true", description: "Premiere annonce standard gratuite (campagne d'acquisition)" },
+  { key: "free_first_announcement", value: "true", description: "Premiere annonce standard gratuite (une fois a vie)" },
+  { key: "promo_active", value: "false", description: "Promo : N annonces gratuites pendant une periode" },
+  { key: "promo_free_count", value: "3", description: "Promo : nombre d'annonces gratuites par user" },
+  { key: "promo_start_date", value: "2026-05-01", description: "Promo : date de debut (AAAA-MM-JJ)" },
+  { key: "promo_end_date", value: "2026-05-31", description: "Promo : date de fin (AAAA-MM-JJ)" },
   { key: "announcement_duration_days", value: "30", description: "Duree d'une annonce (jours)" },
   { key: "max_kg_per_announcement", value: "50", description: "Kg max par annonce" },
   { key: "auto_expire_enabled", value: "true", description: "Expiration automatique des annonces" },
@@ -90,7 +94,8 @@ export default function SettingsPage() {
   }
 
   // Group configs
-  const pricingKeys = ["price_standard", "price_boosted", "price_extension", "price_extra_announcement", "free_first_announcement", "platform_commission_percent"];
+  const pricingKeys = ["price_standard", "price_boosted", "price_extension", "price_extra_announcement", "platform_commission_percent"];
+  const promoKeys = ["free_first_announcement", "promo_active", "promo_free_count", "promo_start_date", "promo_end_date"];
   const announcementKeys = ["announcement_duration_days", "max_kg_per_announcement", "auto_expire_enabled"];
   const moderationKeys = ["moderation_auto_suspend_reports"];
 
@@ -99,7 +104,7 @@ export default function SettingsPage() {
     ...configs.map((c) => c.key),
   ]));
   const otherKeys = allKeys.filter(
-    (k) => !pricingKeys.includes(k) && !announcementKeys.includes(k) && !moderationKeys.includes(k)
+    (k) => !pricingKeys.includes(k) && !promoKeys.includes(k) && !announcementKeys.includes(k) && !moderationKeys.includes(k)
   );
 
   if (loading) {
@@ -187,6 +192,7 @@ export default function SettingsPage() {
       </div>
 
       {renderGroup("Tarification", pricingKeys)}
+      {renderGroup("Promotions", promoKeys)}
       {renderGroup("Annonces", announcementKeys)}
       {renderGroup("Moderation", moderationKeys)}
       {otherKeys.length > 0 && renderGroup("Autres", otherKeys)}

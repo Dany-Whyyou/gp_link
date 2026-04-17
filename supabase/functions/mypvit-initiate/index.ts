@@ -160,16 +160,30 @@ async function resolveAmount(
     extra_announcement: 2000,
   };
 
-  // Première annonce STANDARD gratuite si la campagne est active
+  // Logique de gratuité (uniquement sur les annonces standard)
   if (paymentType === "announcement") {
-    const { data: cfg } = await supabase
+    const keysToFetch = [
+      "free_first_announcement",
+      "promo_active",
+      "promo_free_count",
+      "promo_start_date",
+      "promo_end_date",
+    ];
+    const { data: configs } = await supabase
       .from("app_config")
-      .select("value")
-      .eq("key", "free_first_announcement")
-      .maybeSingle();
-    const rawFlag = cfg?.value;
-    const freeFirstEnabled = rawFlag === "true" || rawFlag === true;
-    if (freeFirstEnabled) {
+      .select("key, value")
+      .in("key", keysToFetch);
+    const cfg: Record<string, unknown> = {};
+    for (const row of (configs ?? []) as Array<{ key: string; value: unknown }>) {
+      cfg[row.key] = row.value;
+    }
+
+    const asBool = (v: unknown) => v === "true" || v === true;
+    const asInt = (v: unknown) =>
+      typeof v === "string" ? parseInt(v, 10) : Number(v);
+
+    // 1. Première annonce gratuite (à vie, 1 fois par user)
+    if (asBool(cfg["free_first_announcement"])) {
       const { count } = await supabase
         .from("payments")
         .select("id", { count: "exact", head: true })
@@ -177,8 +191,42 @@ async function resolveAmount(
         .eq("type", "announcement")
         .eq("status", "completed");
       if ((count ?? 0) === 0) {
-        console.log(`mypvit-initiate: first announcement free for user ${userId}`);
+        console.log(`free: first announcement for user ${userId}`);
         return 0;
+      }
+    }
+
+    // 2. Promo limitée dans le temps (N annonces gratuites par user)
+    if (asBool(cfg["promo_active"])) {
+      const now = new Date();
+      const start = cfg["promo_start_date"]
+        ? new Date(String(cfg["promo_start_date"]).replace(/"/g, ""))
+        : null;
+      const end = cfg["promo_end_date"]
+        ? new Date(String(cfg["promo_end_date"]).replace(/"/g, ""))
+        : null;
+      const withinWindow =
+        (!start || now >= start) && (!end || now <= end);
+      const promoCount = asInt(cfg["promo_free_count"]);
+
+      if (withinWindow && Number.isFinite(promoCount) && promoCount > 0) {
+        // Compte les annonces gratuites déjà utilisées par cet user dans la fenêtre promo
+        let q = supabase
+          .from("payments")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("type", "announcement")
+          .eq("status", "completed")
+          .eq("amount", 0);
+        if (start) q = q.gte("paid_at", start.toISOString());
+        if (end) q = q.lte("paid_at", end.toISOString());
+        const { count: usedInPromo } = await q;
+        if ((usedInPromo ?? 0) < promoCount) {
+          console.log(
+            `free: promo (${usedInPromo ?? 0}/${promoCount}) for user ${userId}`,
+          );
+          return 0;
+        }
       }
     }
   }

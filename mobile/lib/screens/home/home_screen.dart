@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/auth_provider.dart';
 import 'package:gp_link/providers/chat_provider.dart';
+import 'package:gp_link/providers/free_offer_provider.dart';
 import 'package:gp_link/providers/notification_provider.dart';
 import 'package:gp_link/screens/announcements/announcements_list_screen.dart';
 import 'package:gp_link/screens/alerts/alerts_list_screen.dart';
@@ -87,13 +88,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return FloatingActionButton.extended(
       backgroundColor: AppTheme.primarySky,
-      onPressed: () => context.push('/announcements/create'),
+      onPressed: _onPublishTap,
       icon: const Icon(Icons.add, color: Colors.white),
       label: const Text(
         'Publier',
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
       ),
     );
+  }
+
+  Future<void> _onPublishTap() async {
+    // Invalide pour forcer un fetch frais (évite le cache entre publications)
+    ref.invalidate(freeOfferProvider);
+    final offer = await ref.read(freeOfferProvider.future);
+
+    if (!mounted) return;
+
+    if (offer.hasFreeFirst) {
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          icon: const Icon(Icons.card_giftcard,
+              color: AppTheme.accentOrange, size: 48),
+          title: const Text('Votre première annonce est offerte !',
+              textAlign: TextAlign.center),
+          content: const Text(
+            'Profitez de GP Link en publiant votre première annonce '
+            'gratuitement. Aucun paiement ne vous sera demandé.',
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Plus tard'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.push('/announcements/create');
+              },
+              child: const Text('Publier maintenant'),
+            ),
+          ],
+        ),
+      );
+    } else if (offer.promoRemaining > 0) {
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          icon: const Icon(Icons.local_offer,
+              color: AppTheme.accentOrange, size: 48),
+          title: Text(
+            'Promo en cours : ${offer.promoRemaining} annonce${offer.promoRemaining > 1 ? "s" : ""} gratuite${offer.promoRemaining > 1 ? "s" : ""} restante${offer.promoRemaining > 1 ? "s" : ""}',
+            textAlign: TextAlign.center,
+          ),
+          content: const Text(
+            'Profitez de la promotion en cours pour publier votre annonce sans frais.',
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Plus tard'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.push('/announcements/create');
+              },
+              child: const Text('Publier'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      context.push('/announcements/create');
+    }
   }
 }
 

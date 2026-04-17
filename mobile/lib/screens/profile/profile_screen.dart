@@ -184,19 +184,27 @@ class ProfileScreen extends ConsumerWidget {
                 _MenuItem(
                   icon: Icons.announcement_outlined,
                   label: 'Mes annonces',
-                  onTap: () {
-                    // Navigate to my announcements (reusing the list)
-                  },
+                  onTap: () => context.push('/my/announcements'),
                 ),
                 _MenuItem(
                   icon: Icons.bookmark_outline,
                   label: 'Mes réservations',
-                  onTap: () {},
+                  onTap: () => context.push('/my/bookings'),
                 ),
                 _MenuItem(
                   icon: Icons.payment,
                   label: 'Mes paiements',
-                  onTap: () {},
+                  onTap: () => context.push('/my/payments'),
+                ),
+                _MenuItem(
+                  icon: Icons.chat_bubble_outline,
+                  label: 'Messages',
+                  onTap: () => context.push('/messages'),
+                ),
+                _MenuItem(
+                  icon: Icons.notifications_outlined,
+                  label: 'Notifications',
+                  onTap: () => context.push('/notifications'),
                 ),
                 _MenuItem(
                   icon: Icons.school_outlined,

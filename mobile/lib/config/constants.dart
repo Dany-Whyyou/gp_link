@@ -26,9 +26,9 @@ class AppConstants {
   static String get mypvitInitiateUrl => '$supabaseUrl/functions/v1/mypvit-initiate';
 
   // -- Legal pages (hosted) --
-  static const String termsUrl = 'https://dadel.net/gp-link/terms';
-  static const String privacyUrl = 'https://dadel.net/gp-link/privacy';
-  static const String supportUrl = 'https://dadel.net/gp-link/support';
+  static const String termsUrl = 'https://project-preview.ovh/gp-link/terms';
+  static const String privacyUrl = 'https://project-preview.ovh/gp-link/privacy';
+  static const String supportUrl = 'https://project-preview.ovh/gp-link/support';
   static const String termsVersion = '1.0';
 
   // -- OneSignal --

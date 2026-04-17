@@ -9,6 +9,7 @@ const DEFAULT_CONFIGS = [
   { key: "price_boosted", value: "3000", description: "Prix annonce boostee (FCFA)" },
   { key: "price_extension", value: "1000", description: "Prix extension d'annonce (FCFA)" },
   { key: "price_extra_announcement", value: "2000", description: "Prix annonce supplementaire (FCFA)" },
+  { key: "free_first_announcement", value: "true", description: "Premiere annonce standard gratuite (campagne d'acquisition)" },
   { key: "announcement_duration_days", value: "30", description: "Duree d'une annonce (jours)" },
   { key: "max_kg_per_announcement", value: "50", description: "Kg max par annonce" },
   { key: "auto_expire_enabled", value: "true", description: "Expiration automatique des annonces" },
@@ -89,7 +90,7 @@ export default function SettingsPage() {
   }
 
   // Group configs
-  const pricingKeys = ["price_standard", "price_boosted", "price_extension", "price_extra_announcement", "platform_commission_percent"];
+  const pricingKeys = ["price_standard", "price_boosted", "price_extension", "price_extra_announcement", "free_first_announcement", "platform_commission_percent"];
   const announcementKeys = ["announcement_duration_days", "max_kg_per_announcement", "auto_expire_enabled"];
   const moderationKeys = ["moderation_auto_suspend_reports"];
 

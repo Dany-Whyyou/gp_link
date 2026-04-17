@@ -145,6 +145,7 @@ function generateReference(userId: string): string {
 async function resolveAmount(
   supabase: ReturnType<typeof createClient>,
   paymentType: PaymentType,
+  userId: string,
 ): Promise<number> {
   const keyByType: Record<PaymentType, string> = {
     announcement: "price_standard",
@@ -158,6 +159,30 @@ async function resolveAmount(
     extension: 1000,
     extra_announcement: 2000,
   };
+
+  // Première annonce STANDARD gratuite si la campagne est active
+  if (paymentType === "announcement") {
+    const { data: cfg } = await supabase
+      .from("app_config")
+      .select("value")
+      .eq("key", "free_first_announcement")
+      .maybeSingle();
+    const rawFlag = cfg?.value;
+    const freeFirstEnabled = rawFlag === "true" || rawFlag === true;
+    if (freeFirstEnabled) {
+      const { count } = await supabase
+        .from("payments")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("type", "announcement")
+        .eq("status", "completed");
+      if ((count ?? 0) === 0) {
+        console.log(`mypvit-initiate: first announcement free for user ${userId}`);
+        return 0;
+      }
+    }
+  }
+
   const key = keyByType[paymentType];
   const { data } = await supabase
     .from("app_config")
@@ -227,7 +252,7 @@ serve(async (req: Request) => {
     return jsonResponse({ error: "Announcement not found" }, 404);
   }
 
-  const amount = await resolveAmount(supabase, payment_type);
+  const amount = await resolveAmount(supabase, payment_type, userId);
 
   // Si amount > 0, operator + phone requis
   if (amount > 0) {

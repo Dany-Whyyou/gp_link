@@ -8,4 +8,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.mypvit-initiate]
-verify_jwt = true
+# JWT vérifié manuellement dans le code via auth.getUser() pour éviter
+# l'erreur "Unsupported JWT algorithm ES256" du runtime Edge
+verify_jwt = false

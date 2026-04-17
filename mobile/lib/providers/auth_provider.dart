@@ -98,9 +98,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _authService.sendOtp(phone);
       state = state.copyWith(isLoading: false);
     } catch (e) {
+      final msg = e.toString();
       state = state.copyWith(
         isLoading: false,
-        error: 'Erreur d\'envoi du code. Vérifiez votre numéro.',
+        error: 'Erreur d\'envoi du code. $msg',
       );
     }
   }
@@ -113,9 +114,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _loadProfile();
       return true;
     } catch (e) {
+      final msg = e.toString();
       state = state.copyWith(
         isLoading: false,
-        error: 'Code incorrect ou expiré.',
+        error: 'Code incorrect ou expiré. $msg',
       );
       return false;
     }

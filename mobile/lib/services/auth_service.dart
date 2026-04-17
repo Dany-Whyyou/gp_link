@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/models/profile.dart';
@@ -8,16 +9,48 @@ class AuthService {
 
   /// Send OTP. Phone must already be in E.164 format (e.g., "+24177730634").
   Future<void> sendOtp(String phoneE164) async {
-    await _auth.signInWithOtp(phone: phoneE164);
+    dev.log('[Auth] sendOtp → $phoneE164', name: 'gp_link.auth');
+    try {
+      await _auth.signInWithOtp(phone: phoneE164);
+      dev.log('[Auth] sendOtp SUCCESS for $phoneE164', name: 'gp_link.auth');
+    } on AuthException catch (e) {
+      dev.log(
+        '[Auth] sendOtp AuthException: ${e.message} (statusCode=${e.statusCode}, code=${e.code})',
+        name: 'gp_link.auth',
+        error: e,
+      );
+      rethrow;
+    } catch (e, st) {
+      dev.log('[Auth] sendOtp unexpected: $e',
+          name: 'gp_link.auth', error: e, stackTrace: st);
+      rethrow;
+    }
   }
 
   /// Verify the OTP code. Phone must be E.164.
   Future<AuthResponse> verifyOtp(String phoneE164, String code) async {
-    return await _auth.verifyOTP(
-      phone: phoneE164,
-      token: code,
-      type: OtpType.sms,
-    );
+    dev.log('[Auth] verifyOtp → $phoneE164 code=$code', name: 'gp_link.auth');
+    try {
+      final res = await _auth.verifyOTP(
+        phone: phoneE164,
+        token: code,
+        type: OtpType.sms,
+      );
+      dev.log('[Auth] verifyOtp SUCCESS userId=${res.user?.id}',
+          name: 'gp_link.auth');
+      return res;
+    } on AuthException catch (e) {
+      dev.log(
+        '[Auth] verifyOtp AuthException: ${e.message} (statusCode=${e.statusCode}, code=${e.code})',
+        name: 'gp_link.auth',
+        error: e,
+      );
+      rethrow;
+    } catch (e, st) {
+      dev.log('[Auth] verifyOtp unexpected: $e',
+          name: 'gp_link.auth', error: e, stackTrace: st);
+      rethrow;
+    }
   }
 
   /// Create or update the user profile after first login.

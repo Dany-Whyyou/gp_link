@@ -47,8 +47,11 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  remove_alpha_ios: true
-  image_path: "assets/logo/icon_1024.png"
+  # iOS : icon déjà plat/opaque, pas besoin de remove_alpha
+  image_path_ios: "assets/logo/icon_ios_flat.png"
+  # Android legacy : logo complet avec coins arrondis
+  image_path_android: "assets/logo/icon_1024.png"
+  # Android adaptive (API 26+) : bg + fg séparés
   adaptive_icon_background: "assets/logo/icon_background.png"
   adaptive_icon_foreground: "assets/logo/icon_foreground.png"
   min_sdk_android: 21

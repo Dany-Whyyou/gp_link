@@ -369,7 +369,7 @@ class _CreateAnnouncementScreenState
                   value: _deliverToAddress,
                   onChanged: (v) =>
                       setState(() => _deliverToAddress = v ?? false),
-                  title: const Text('Livraison à domicile'),
+                  title: const Text('Rendez-vous après l\'arrivée'),
                   activeColor: AppTheme.primarySky,
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,

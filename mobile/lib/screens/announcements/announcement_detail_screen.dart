@@ -276,9 +276,9 @@ class _AnnouncementDetailScreenState
                       value: 'A l\'aéroport'),
                 if (announcement.deliverToAddress)
                   const _DetailRow(
-                      icon: Icons.local_shipping,
-                      label: 'Livraison',
-                      value: 'A domicile'),
+                      icon: Icons.handshake_outlined,
+                      label: 'Remise',
+                      value: 'Rendez-vous après l\'arrivée'),
 
                 if (announcement.description != null &&
                     announcement.description!.isNotEmpty) ...[

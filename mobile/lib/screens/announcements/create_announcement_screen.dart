@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:gp_link/config/constants.dart';
 import 'package:gp_link/config/theme.dart';
 import 'package:gp_link/providers/announcement_provider.dart';
-import 'package:gp_link/providers/auth_provider.dart';
 import 'package:gp_link/providers/app_config_provider.dart';
 import 'package:gp_link/services/app_config_service.dart';
 import 'package:gp_link/widgets/country_picker.dart';
@@ -26,8 +25,6 @@ class _CreateAnnouncementScreenState
   final _kgController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _flightNumberController = TextEditingController();
-  final _airlineController = TextEditingController();
 
   String _departureCountry = 'Gabon';
   String _arrivalCountry = 'France';
@@ -47,8 +44,6 @@ class _CreateAnnouncementScreenState
     _kgController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
-    _flightNumberController.dispose();
-    _airlineController.dispose();
     _itemController.dispose();
     super.dispose();
   }
@@ -129,12 +124,8 @@ class _CreateAnnouncementScreenState
         description: _descriptionController.text.trim().isNotEmpty
             ? _descriptionController.text.trim()
             : null,
-        flightNumber: _flightNumberController.text.trim().isNotEmpty
-            ? _flightNumberController.text.trim()
-            : null,
-        airline: _airlineController.text.trim().isNotEmpty
-            ? _airlineController.text.trim()
-            : null,
+        flightNumber: null,
+        airline: null,
         acceptedItems: _acceptedItems,
         rejectedItems: _rejectedItems,
         collectAtAirport: _collectAtAirport,
@@ -342,36 +333,6 @@ class _CreateAnnouncementScreenState
                           }
                           return null;
                         },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Flight info
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _airlineController,
-                        decoration: const InputDecoration(
-                          labelText: 'Compagnie',
-                          hintText: 'Ex: Air France',
-                          prefixIcon: Icon(Icons.airlines, size: 18),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _flightNumberController,
-                        textCapitalization: TextCapitalization.characters,
-                        decoration: const InputDecoration(
-                          labelText: 'N° de vol',
-                          hintText: 'Ex: AF990',
-                          prefixIcon:
-                              Icon(Icons.confirmation_number, size: 18),
-                        ),
                       ),
                     ),
                   ],

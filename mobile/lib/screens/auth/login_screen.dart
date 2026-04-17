@@ -1,3 +1,5 @@
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,11 +45,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _sendOtp() async {
-    if (!_formKey.currentState!.validate()) return;
+    dev.log('[Login] _sendOtp called', name: 'gp_link.login');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Envoi en cours...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    final formOk = _formKey.currentState?.validate() ?? false;
+    dev.log('[Login] form valid: $formOk, phone="${_phoneController.text}"',
+        name: 'gp_link.login');
+    if (!formOk) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vérifiez le numéro saisi'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
+      return;
+    }
+
     final e164 = _toE164();
+    dev.log('[Login] E.164 = $e164', name: 'gp_link.login');
     if (e164 == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Numéro invalide')),
+        const SnackBar(
+          content: Text('Numéro invalide (vérifiez que le pays est sélectionné)'),
+          backgroundColor: AppTheme.error,
+        ),
       );
       return;
     }
@@ -56,6 +82,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref.read(authProvider.notifier).sendOtp(e164);
     if (!mounted) return;
     final state = ref.read(authProvider);
+    dev.log(
+        '[Login] after sendOtp - error=${state.error}, loading=${state.isLoading}',
+        name: 'gp_link.login');
     if (state.error == null) {
       setState(() => _otpSent = true);
     }

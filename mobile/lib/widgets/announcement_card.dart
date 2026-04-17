@@ -32,11 +32,6 @@ class AnnouncementCard extends ConsumerWidget {
     final depCountry = _country(countries, announcement.departureCountry);
     final arrCountry = _country(countries, announcement.arrivalCountry);
 
-    final fillRatio = (announcement.availableKg == 0)
-        ? 0.0
-        : ((announcement.bookedKg ?? 0) / announcement.availableKg)
-            .clamp(0.0, 1.0);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Material(
@@ -102,8 +97,6 @@ class AnnouncementCard extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      _kgBar(fillRatio),
                       if (showTravelerInfo &&
                           announcement.traveler != null) ...[
                         const SizedBox(height: 12),
@@ -227,47 +220,6 @@ class AnnouncementCard extends ConsumerWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-      ],
-    );
-  }
-
-  Widget _kgBar(double fillRatio) {
-    final remaining = announcement.remainingKg;
-    final total = announcement.availableKg;
-    final isFull = remaining <= 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.inventory_2_outlined,
-                size: 14,
-                color: isFull ? AppTheme.error : AppTheme.gabonGreen),
-            const SizedBox(width: 5),
-            Text(
-              isFull
-                  ? 'Complet'
-                  : '${remaining.toStringAsFixed(0)} kg sur ${total.toStringAsFixed(0)} disponibles',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isFull ? AppTheme.error : AppTheme.gabonGreen,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: fillRatio,
-            minHeight: 6,
-            backgroundColor: AppTheme.gabonGreen.withValues(alpha: 0.15),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              isFull ? AppTheme.error : AppTheme.accentOrange,
-            ),
-          ),
-        ),
       ],
     );
   }

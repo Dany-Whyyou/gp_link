@@ -255,11 +255,6 @@ class _AnnouncementDetailScreenState
 
                 // Details cards
                 _DetailRow(
-                    icon: Icons.inventory_2,
-                    label: 'Kilos disponibles',
-                    value:
-                        '${announcement.remainingKg.toStringAsFixed(1)} / ${announcement.availableKg.toStringAsFixed(1)} kg'),
-                _DetailRow(
                     icon: Icons.attach_money,
                     label: 'Prix par kilo',
                     value:

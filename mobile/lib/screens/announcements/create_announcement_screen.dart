@@ -24,7 +24,6 @@ class CreateAnnouncementScreen extends ConsumerStatefulWidget {
 class _CreateAnnouncementScreenState
     extends ConsumerState<CreateAnnouncementScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _kgController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -43,7 +42,6 @@ class _CreateAnnouncementScreenState
 
   @override
   void dispose() {
-    _kgController.dispose();
     _priceController.dispose();
     _descriptionController.dispose();
     _itemController.dispose();
@@ -126,7 +124,7 @@ class _CreateAnnouncementScreenState
         arrivalCountry: _arrivalCountry,
         departureDate: _departureDate!,
         arrivalDate: _arrivalDate,
-        availableKg: double.parse(_kgController.text),
+        availableKg: 20, // Valeur par défaut (champ masqué côté UI)
         pricePerKg: double.parse(_priceController.text),
         type: _type,
         description: _descriptionController.text.trim().isNotEmpty
@@ -309,37 +307,9 @@ class _CreateAnnouncementScreenState
                 ),
                 const SizedBox(height: 16),
 
-                // KG and price
+                // Price
                 Row(
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _kgController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,1}')),
-                        ],
-                        decoration: const InputDecoration(
-                          labelText: 'Kilos disponibles *',
-                          suffixText: 'kg',
-                          prefixIcon: Icon(Icons.inventory_2, size: 18),
-                        ),
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Requis';
-                          final kg = double.tryParse(v);
-                          if (kg == null || kg < AppConstants.minKgPerAnnouncement) {
-                            return 'Min ${AppConstants.minKgPerAnnouncement} kg';
-                          }
-                          if (kg > AppConstants.maxKgPerAnnouncement) {
-                            return 'Max ${AppConstants.maxKgPerAnnouncement} kg';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: TextFormField(
                         controller: _priceController,

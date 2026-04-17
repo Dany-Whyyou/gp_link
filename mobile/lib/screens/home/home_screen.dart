@@ -83,7 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget? _buildFab(BuildContext context) {
     final profile = ref.watch(currentProfileProvider);
-    if (profile == null || !profile.isVoyageur) return null;
+    if (profile == null) return null;
 
     return FloatingActionButton.extended(
       backgroundColor: AppTheme.primarySky,

@@ -20,25 +20,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.flight,
       title: 'Voyagez et gagnez',
       description:
-          'Vous voyagez entre le Gabon et l\'international ? '
-          'Rentabilisez vos kilos disponibles en transportant des colis.',
-      color: AppTheme.gabonGreen,
+          'Vous voyagez entre deux pays ? Rentabilisez vos kilos '
+          'disponibles en transportant des colis pour d\'autres voyageurs.',
+      color: AppTheme.primarySky,
     ),
     _OnboardingPage(
-      icon: Icons.inventory_2,
-      title: 'Envoyez vos colis',
+      icon: Icons.public,
+      title: 'Expédiez partout',
       description:
-          'Trouvez un voyageur de confiance pour envoyer vos colis '
-          'au Gabon ou à l\'étranger, rapidement et à moindre coût.',
-      color: AppTheme.primarySky,
+          'Envoyez vos colis entre les pays où GP Link est disponible '
+          'grâce à des voyageurs vérifiés, plus rapidement et à moindre coût.',
+      color: AppTheme.accentOrange,
     ),
     _OnboardingPage(
       icon: Icons.security,
       title: 'En toute sécurité',
       description:
-          'Profils vérifiés, messagerie intégrée et paiement sécurisé '
-          'par Mobile Money. Vos envois sont entre de bonnes mains.',
-      color: AppTheme.primarySky,
+          'Profils vérifiés, messagerie intégrée, paiement sécurisé via '
+          'Mobile Money ou Store natif. Vos envois sont entre de bonnes mains.',
+      color: AppTheme.gabonGreen,
     ),
   ];
 

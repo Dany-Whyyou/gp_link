@@ -80,11 +80,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Widget _buildPhoneRow(List<Country> countries) {
-    _country ??= countries.firstWhere(
+  Country _guessCountry(List<Country> countries) {
+    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    final deviceCountry = deviceLocale.countryCode;
+    if (deviceCountry != null) {
+      final match = countries.where((c) => c.code == deviceCountry).firstOrNull;
+      if (match != null) return match;
+    }
+    return countries.firstWhere(
       (c) => c.code == 'GA',
       orElse: () => countries.first,
     );
+  }
+
+  Widget _buildPhoneRow(List<Country> countries) {
+    _country ??= _guessCountry(countries);
     final c = _country!;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

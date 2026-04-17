@@ -29,7 +29,6 @@ const DEFAULT_CONFIGS = [
   { key: "max_kg_per_announcement", value: "50", description: "Kg max par annonce" },
   { key: "auto_expire_enabled", value: "true", description: "Expiration automatique des annonces" },
   { key: "moderation_auto_suspend_reports", value: "3", description: "Nombre de signalements avant suspension auto" },
-  { key: "platform_commission_percent", value: "10", description: "Commission plateforme (%)" },
 ];
 
 export default function SettingsPage() {
@@ -108,7 +107,7 @@ export default function SettingsPage() {
   const pricingXafKeys = ["price_standard_XAF", "price_boosted_XAF", "price_extension_XAF", "price_extra_announcement_XAF"];
   const pricingEurKeys = ["price_standard_EUR", "price_boosted_EUR", "price_extension_EUR", "price_extra_announcement_EUR"];
   const pricingUsdKeys = ["price_standard_USD", "price_boosted_USD", "price_extension_USD", "price_extra_announcement_USD"];
-  const pricingKeys = [...pricingXafKeys, ...pricingEurKeys, ...pricingUsdKeys, "platform_commission_percent"];
+  const pricingKeys = [...pricingXafKeys, ...pricingEurKeys, ...pricingUsdKeys];
   const promoKeys = ["free_first_announcement", "promo_active", "promo_free_count", "promo_start_date", "promo_end_date"];
   const announcementKeys = ["announcement_duration_days", "max_kg_per_announcement", "auto_expire_enabled"];
   const moderationKeys = ["moderation_auto_suspend_reports"];
@@ -205,7 +204,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {renderGroup("Tarification FCFA (XAF)", [...pricingXafKeys, "platform_commission_percent"])}
+      {renderGroup("Tarification FCFA (XAF)", pricingXafKeys)}
       {renderGroup("Tarification Euro (EUR)", pricingEurKeys)}
       {renderGroup("Tarification Dollar (USD)", pricingUsdKeys)}
       {renderGroup("Promotions", promoKeys)}

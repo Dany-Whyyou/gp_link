@@ -316,12 +316,6 @@ class AnnouncementCard extends ConsumerWidget {
                 style: const TextStyle(
                     fontSize: 12, fontWeight: FontWeight.w600),
               ),
-              if (t.ratingCount > 0)
-                Text(
-                  ' (${t.ratingCount})',
-                  style:
-                      TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                ),
             ],
           ),
       ],
@@ -337,8 +331,8 @@ class _PathPainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    final dashWidth = 4.0;
-    final dashSpace = 3.0;
+    const dashWidth = 4.0;
+    const dashSpace = 3.0;
     final midY = size.height / 2;
     double startX = 0;
     while (startX < size.width) {

@@ -5,10 +5,21 @@ import { createClient } from "@/lib/supabase-client";
 import type { AppConfig } from "@/types";
 
 const DEFAULT_CONFIGS = [
-  { key: "price_standard", value: "1500", description: "Prix annonce standard (FCFA)" },
-  { key: "price_boosted", value: "3000", description: "Prix annonce boostee (FCFA)" },
-  { key: "price_extension", value: "1000", description: "Prix extension d'annonce (FCFA)" },
-  { key: "price_extra_announcement", value: "2000", description: "Prix annonce supplementaire (FCFA)" },
+  // XAF (FCFA) - zone CEMAC/UEMOA
+  { key: "price_standard_XAF", value: "1500", description: "Standard (FCFA)" },
+  { key: "price_boosted_XAF", value: "3000", description: "Boostee (FCFA)" },
+  { key: "price_extension_XAF", value: "1000", description: "Extension (FCFA)" },
+  { key: "price_extra_announcement_XAF", value: "2000", description: "Supplementaire (FCFA)" },
+  // EUR - France, Belgique
+  { key: "price_standard_EUR", value: "3", description: "Standard (EUR)" },
+  { key: "price_boosted_EUR", value: "5", description: "Boostee (EUR)" },
+  { key: "price_extension_EUR", value: "2", description: "Extension (EUR)" },
+  { key: "price_extra_announcement_EUR", value: "4", description: "Supplementaire (EUR)" },
+  // USD - Etats-Unis
+  { key: "price_standard_USD", value: "3", description: "Standard (USD)" },
+  { key: "price_boosted_USD", value: "5", description: "Boostee (USD)" },
+  { key: "price_extension_USD", value: "2", description: "Extension (USD)" },
+  { key: "price_extra_announcement_USD", value: "4", description: "Supplementaire (USD)" },
   { key: "free_first_announcement", value: "true", description: "Premiere annonce standard gratuite (une fois a vie)" },
   { key: "promo_active", value: "false", description: "Promo : N annonces gratuites pendant une periode" },
   { key: "promo_free_count", value: "3", description: "Promo : nombre d'annonces gratuites par user" },
@@ -94,7 +105,10 @@ export default function SettingsPage() {
   }
 
   // Group configs
-  const pricingKeys = ["price_standard", "price_boosted", "price_extension", "price_extra_announcement", "platform_commission_percent"];
+  const pricingXafKeys = ["price_standard_XAF", "price_boosted_XAF", "price_extension_XAF", "price_extra_announcement_XAF"];
+  const pricingEurKeys = ["price_standard_EUR", "price_boosted_EUR", "price_extension_EUR", "price_extra_announcement_EUR"];
+  const pricingUsdKeys = ["price_standard_USD", "price_boosted_USD", "price_extension_USD", "price_extra_announcement_USD"];
+  const pricingKeys = [...pricingXafKeys, ...pricingEurKeys, ...pricingUsdKeys, "platform_commission_percent"];
   const promoKeys = ["free_first_announcement", "promo_active", "promo_free_count", "promo_start_date", "promo_end_date"];
   const announcementKeys = ["announcement_duration_days", "max_kg_per_announcement", "auto_expire_enabled"];
   const moderationKeys = ["moderation_auto_suspend_reports"];
@@ -191,7 +205,9 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {renderGroup("Tarification", pricingKeys)}
+      {renderGroup("Tarification FCFA (XAF)", [...pricingXafKeys, "platform_commission_percent"])}
+      {renderGroup("Tarification Euro (EUR)", pricingEurKeys)}
+      {renderGroup("Tarification Dollar (USD)", pricingUsdKeys)}
       {renderGroup("Promotions", promoKeys)}
       {renderGroup("Annonces", announcementKeys)}
       {renderGroup("Moderation", moderationKeys)}

@@ -142,12 +142,31 @@ function generateReference(userId: string): string {
   return `GPL${short}${ts}`;
 }
 
+async function resolveUserCurrency(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<string> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("country")
+    .eq("id", userId)
+    .maybeSingle();
+  if (!profile?.country) return "XAF";
+  const { data: country } = await supabase
+    .from("countries")
+    .select("currency_code")
+    .eq("name", profile.country)
+    .maybeSingle();
+  return (country?.currency_code as string | undefined) ?? "XAF";
+}
+
 async function resolveAmount(
   supabase: ReturnType<typeof createClient>,
   paymentType: PaymentType,
   userId: string,
-): Promise<number> {
-  const keyByType: Record<PaymentType, string> = {
+): Promise<{ amount: number; currency: string }> {
+  const currency = await resolveUserCurrency(supabase, userId);
+  const suffixByType: Record<PaymentType, string> = {
     announcement: "price_standard",
     boost: "price_boosted",
     extension: "price_extension",
@@ -192,7 +211,7 @@ async function resolveAmount(
         .eq("status", "completed");
       if ((count ?? 0) === 0) {
         console.log(`free: first announcement for user ${userId}`);
-        return 0;
+        return { amount: 0, currency };
       }
     }
 
@@ -225,22 +244,33 @@ async function resolveAmount(
           console.log(
             `free: promo (${usedInPromo ?? 0}/${promoCount}) for user ${userId}`,
           );
-          return 0;
+          return { amount: 0, currency };
         }
       }
     }
   }
 
-  const key = keyByType[paymentType];
+  // Key spécifique à la devise (ex: price_standard_EUR)
+  const primaryKey = `${suffixByType[paymentType]}_${currency}`;
+  const fallbackKey = suffixByType[paymentType];
   const { data } = await supabase
     .from("app_config")
-    .select("value")
-    .eq("key", key)
-    .maybeSingle();
-  const raw = data?.value;
-  const parsed = typeof raw === "string" ? parseInt(raw, 10) : Number(raw);
-  if (Number.isFinite(parsed)) return parsed;
-  return defaultByType[paymentType];
+    .select("key, value")
+    .in("key", [primaryKey, fallbackKey]);
+  const map = new Map<string, unknown>();
+  for (const row of (data ?? []) as Array<{ key: string; value: unknown }>) {
+    map.set(row.key, row.value);
+  }
+  const extract = (k: string) => {
+    const v = map.get(k);
+    if (v == null) return NaN;
+    const s = typeof v === "string" ? v : String(v);
+    return parseInt(s, 10);
+  };
+  let amount = extract(primaryKey);
+  if (!Number.isFinite(amount)) amount = extract(fallbackKey);
+  if (!Number.isFinite(amount)) amount = defaultByType[paymentType];
+  return { amount, currency };
 }
 
 async function getUserIdFromRequest(req: Request): Promise<string | null> {
@@ -300,7 +330,7 @@ serve(async (req: Request) => {
     return jsonResponse({ error: "Announcement not found" }, 404);
   }
 
-  const amount = await resolveAmount(supabase, payment_type, userId);
+  const { amount, currency } = await resolveAmount(supabase, payment_type, userId);
 
   // Si amount > 0, operator + phone requis
   if (amount > 0) {
@@ -321,7 +351,7 @@ serve(async (req: Request) => {
       announcement_id,
       type: payment_type,
       amount,
-      currency: "XAF",
+      currency,
       provider: amount > 0 ? "mypvit" : "free",
       reference,
       operator: amount > 0 ? operator : null,
@@ -385,7 +415,7 @@ serve(async (req: Request) => {
       payment_id: paymentRow.id,
       reference,
       amount: 0,
-      currency: "XAF",
+      currency,
       mypvit_transaction_id: null,
       status: "completed",
       message: "Annonce publiée gratuitement.",
@@ -442,7 +472,7 @@ serve(async (req: Request) => {
       payment_id: paymentRow.id,
       reference,
       amount,
-      currency: "XAF",
+      currency,
       mypvit_transaction_id: mypvitTxId,
       status: "pending",
       message: "Confirmez le paiement sur votre telephone.",

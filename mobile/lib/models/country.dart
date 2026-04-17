@@ -8,6 +8,8 @@ class Country {
   final int? phoneMaxDigits;
   final bool supportsMobileMoney;
   final bool isPopular;
+  final String currencyCode;
+  final String currencySymbol;
 
   const Country({
     required this.code,
@@ -19,6 +21,8 @@ class Country {
     this.phoneMaxDigits,
     this.supportsMobileMoney = false,
     this.isPopular = false,
+    this.currencyCode = 'XAF',
+    this.currencySymbol = 'FCFA',
   });
 
   factory Country.fromJson(Map<String, dynamic> json) => Country(
@@ -31,6 +35,8 @@ class Country {
         phoneMaxDigits: json['phone_max_digits'] as int?,
         supportsMobileMoney: json['supports_mobile_money'] as bool? ?? false,
         isPopular: json['is_popular'] as bool? ?? false,
+        currencyCode: json['currency_code'] as String? ?? 'XAF',
+        currencySymbol: json['currency_symbol'] as String? ?? 'FCFA',
       );
 
   String get displayLabel =>

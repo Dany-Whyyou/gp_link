@@ -150,7 +150,7 @@ async function resolveAmount(
     announcement: "price_standard",
     boost: "price_boosted",
     extension: "price_extension",
-    extra_announcement: "price_extra_kg",
+    extra_announcement: "price_extra_announcement",
   };
   const defaultByType: Record<PaymentType, number> = {
     announcement: 1500,
